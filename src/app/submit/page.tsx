@@ -27,7 +27,7 @@ export default function SubmitPage() {
     const data = {
       name: formData.get("name") as string,
       description: formData.get("description") as string,
-      longDescription: formData.get("longDescription") as string,
+
       category: formData.get("category") as string,
       installCommand: formData.get("installCommand") as string,
       repositoryUrl: formData.get("repositoryUrl") as string,
@@ -117,19 +117,6 @@ export default function SubmitPage() {
             minLength={10}
             maxLength={500}
             placeholder="Brief description of what your tool does..."
-            className="w-full px-4 py-3 bg-bg-surface border border-border rounded-lg text-text-main placeholder:text-text-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors resize-none"
-          />
-        </div>
-
-        <div className="space-y-1.5">
-          <label htmlFor="longDescription" className="block text-sm font-medium">
-            Detailed Description (optional)
-          </label>
-          <textarea
-            id="longDescription"
-            name="longDescription"
-            rows={6}
-            placeholder="Full description with features, usage examples, etc."
             className="w-full px-4 py-3 bg-bg-surface border border-border rounded-lg text-text-main placeholder:text-text-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors resize-none"
           />
         </div>

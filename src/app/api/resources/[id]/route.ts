@@ -3,7 +3,7 @@ import { db } from "@/lib/db";
 import { resources, users, reviews } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { auth } from "@/lib/auth";
-import { fetchReadmeAsHtml } from "@/lib/github";
+import { fetchReadmeAsHtml, markdownToSafeHtml } from "@/lib/github";
 
 export async function GET(
   _req: Request,
@@ -127,16 +127,19 @@ export async function PATCH(
       if (body[field] !== undefined) updateData[field] = body[field];
     }
 
-    // Re-fetch README when repositoryUrl changes
-    if (
-      updateData.repositoryUrl &&
-      updateData.repositoryUrl !== existing.repositoryUrl
-    ) {
-      const readmeHtml = await fetchReadmeAsHtml(
-        updateData.repositoryUrl as string
-      );
+    // Resolve longDescription: repo README takes priority, manual input as fallback
+    const repoUrl = (updateData.repositoryUrl as string) || existing.repositoryUrl;
+    if (repoUrl) {
+      const readmeHtml = await fetchReadmeAsHtml(repoUrl);
       if (readmeHtml) {
         updateData.longDescription = readmeHtml;
+      }
+    }
+    // If no repo or README fetch failed, process manual longDescription input
+    if (!updateData.longDescription && body.longDescription) {
+      const safeHtml = await markdownToSafeHtml(body.longDescription);
+      if (safeHtml) {
+        updateData.longDescription = safeHtml;
       }
     }
 

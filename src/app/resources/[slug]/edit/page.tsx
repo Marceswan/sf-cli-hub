@@ -22,6 +22,7 @@ export default async function EditResourcePage({ params }: PageProps) {
       name: resources.name,
       slug: resources.slug,
       description: resources.description,
+      longDescription: resources.longDescription,
       category: resources.category,
       installCommand: resources.installCommand,
       repositoryUrl: resources.repositoryUrl,

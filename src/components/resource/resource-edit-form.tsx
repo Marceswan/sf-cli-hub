@@ -18,6 +18,7 @@ interface ResourceEditFormProps {
     name: string;
     slug: string;
     description: string;
+    longDescription: string | null;
     category: string;
     installCommand: string | null;
     repositoryUrl: string | null;
@@ -42,6 +43,7 @@ export function ResourceEditForm({ resource }: ResourceEditFormProps) {
     const data = {
       name: formData.get("name") as string,
       description: formData.get("description") as string,
+      longDescription: formData.get("longDescription") as string,
       category: formData.get("category") as string,
       installCommand: formData.get("installCommand") as string,
       repositoryUrl: formData.get("repositoryUrl") as string,
@@ -152,6 +154,25 @@ export function ResourceEditForm({ resource }: ResourceEditFormProps) {
         placeholder="https://github.com/..."
         defaultValue={resource.repositoryUrl || ""}
       />
+
+      <div className="space-y-1.5">
+        <label htmlFor="longDescription" className="block text-sm font-medium">
+          Long Description
+        </label>
+        <p className="text-xs text-text-muted">
+          If a GitHub Repository URL is provided, this will be auto-populated
+          from the repo&apos;s README on save. Otherwise, paste markdown or HTML
+          here.
+        </p>
+        <textarea
+          id="longDescription"
+          name="longDescription"
+          rows={10}
+          defaultValue={resource.longDescription || ""}
+          placeholder="Paste markdown or HTML content..."
+          className="w-full px-4 py-3 bg-bg-surface border border-border rounded-lg text-text-main placeholder:text-text-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors resize-y font-mono text-sm"
+        />
+      </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Input

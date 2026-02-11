@@ -5,6 +5,7 @@ import { eq, and, ilike, desc, asc, sql, SQL } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { resourceSchema } from "@/lib/validators";
 import { slugify } from "@/lib/utils";
+import { fetchReadmeAsHtml } from "@/lib/github";
 
 export async function GET(req: Request) {
   try {
@@ -132,11 +133,21 @@ export async function POST(req: Request) {
       slug = `${slug}-${Date.now().toString(36)}`;
     }
 
+    // Auto-fetch README from GitHub and use as longDescription
+    let longDescription = data.longDescription || null;
+    if (data.repositoryUrl) {
+      const readmeHtml = await fetchReadmeAsHtml(data.repositoryUrl);
+      if (readmeHtml) {
+        longDescription = readmeHtml;
+      }
+    }
+
     const [resource] = await db
       .insert(resources)
       .values({
         ...data,
         slug,
+        longDescription,
         repositoryUrl: data.repositoryUrl || null,
         npmUrl: data.npmUrl || null,
         documentationUrl: data.documentationUrl || null,

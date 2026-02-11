@@ -151,7 +151,7 @@ export default async function ResourceDetailPage({ params }: PageProps) {
               <h2 className="text-lg font-semibold mb-3">About</h2>
               {/* Safe: HTML is sanitized with DOMPurify at storage time in fetchReadmeAsHtml() */}
               <div
-                className="prose prose-invert max-w-none text-text-muted"
+                className="prose dark:prose-invert max-w-none"
                 dangerouslySetInnerHTML={{ __html: resource.longDescription }}
               />
             </div>

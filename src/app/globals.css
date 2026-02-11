@@ -1,0 +1,175 @@
+@import "tailwindcss";
+
+/*
+ * SFDX Hub — Tailwind v4 CSS-first design tokens
+ * Inspired by Tailwind Plus & the HTML mockup
+ */
+
+@theme {
+  /* Fonts */
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "JetBrains Mono", "Fira Code", monospace;
+
+  /* Colors — Light mode defaults */
+  --color-bg-body: #ffffff;
+  --color-bg-surface: #f8fafc;
+  --color-bg-card: #ffffff;
+  --color-border: #e2e8f0;
+  --color-text-main: #0f172a;
+  --color-text-muted: #64748b;
+
+  --color-primary: #00a1e0;
+  --color-primary-glow: rgba(0, 161, 224, 0.2);
+  --color-accent: #6366f1;
+  --color-accent-pink: #ec4899;
+
+  --color-glass: rgba(255, 255, 255, 0.7);
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-glow: 0 0 40px -10px rgba(99, 102, 241, 0.15);
+
+  /* Radius */
+  --radius-card: 1rem;
+  --radius-pill: 9999px;
+
+  /* Star rating */
+  --color-star: #facc15;
+  --color-star-empty: #334155;
+}
+
+/* Dark mode overrides */
+.dark {
+  --color-bg-body: #020617;
+  --color-bg-surface: #0f172a;
+  --color-bg-card: #1e293b;
+  --color-border: #334155;
+  --color-text-main: #f8fafc;
+  --color-text-muted: #94a3b8;
+  --color-primary: #38bdf8;
+  --color-primary-glow: rgba(56, 189, 248, 0.2);
+  --color-glass: rgba(15, 23, 42, 0.7);
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.5);
+  --shadow-glow: 0 0 60px -15px rgba(99, 102, 241, 0.3);
+  --color-star-empty: #475569;
+}
+
+/* Base */
+body {
+  background-color: var(--color-bg-body);
+  color: var(--color-text-main);
+  font-family: var(--font-sans);
+}
+
+/* Gradient text utility */
+.gradient-text {
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 50%, var(--color-accent-pink) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Hero glow effect */
+.hero-glow::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 1000px;
+  height: 600px;
+  background: radial-gradient(circle, var(--color-primary-glow) 0%, transparent 70%);
+  z-index: 0;
+  filter: blur(80px);
+  pointer-events: none;
+}
+
+/* Glassmorphism */
+.glass {
+  background: var(--color-glass);
+  backdrop-filter: blur(12px);
+}
+
+/* Code block styling */
+.code-block {
+  background: #0f172a;
+  border: 1px solid #334155;
+  border-radius: 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: #e2e8f0;
+  overflow-x: auto;
+  position: relative;
+}
+
+.code-block::before {
+  content: "TERMINAL";
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: #334155;
+  color: #94a3b8;
+  font-size: 0.6rem;
+  padding: 2px 6px;
+  border-bottom-left-radius: 0.5rem;
+}
+
+/* Smooth transitions on theme change */
+* {
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+/* Remove transition on initial load to prevent flash */
+[data-no-transition] * {
+  transition: none !important;
+}
+
+/* Scrollbar styling for dark mode */
+.dark ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.dark ::-webkit-scrollbar-track {
+  background: var(--color-bg-surface);
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 4px;
+}
+
+/* Animation keyframes */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes typing {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+@keyframes blink-caret {
+  from,
+  to {
+    border-color: transparent;
+  }
+  50% {
+    border-color: #38bdf8;
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.5s ease-out forwards;
+}

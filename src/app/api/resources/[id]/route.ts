@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { resources, users, reviews } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { auth } from "@/lib/auth";
+import { fetchReadmeAsHtml } from "@/lib/github";
 
 export async function GET(
   _req: Request,
@@ -126,6 +127,19 @@ export async function PATCH(
       if (body[field] !== undefined) updateData[field] = body[field];
     }
 
+    // Re-fetch README when repositoryUrl changes
+    if (
+      updateData.repositoryUrl &&
+      updateData.repositoryUrl !== existing.repositoryUrl
+    ) {
+      const readmeHtml = await fetchReadmeAsHtml(
+        updateData.repositoryUrl as string
+      );
+      if (readmeHtml) {
+        updateData.longDescription = readmeHtml;
+      }
+    }
+
     updateData.updatedAt = new Date();
 
     const [updated] = await db
@@ -149,11 +163,30 @@ export async function DELETE(
 ) {
   try {
     const session = await auth();
-    if (!session?.user?.id || session.user.role !== "admin") {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const { id } = await params;
+
+    const [resource] = await db
+      .select({ authorId: resources.authorId })
+      .from(resources)
+      .where(eq(resources.id, id))
+      .limit(1);
+
+    if (!resource) {
+      return NextResponse.json(
+        { error: "Resource not found" },
+        { status: 404 }
+      );
+    }
+
+    const isAdmin = session.user.role === "admin";
+    const isOwner = resource.authorId === session.user.id;
+    if (!isAdmin && !isOwner) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
 
     await db.delete(resources).where(eq(resources.id, id));
 

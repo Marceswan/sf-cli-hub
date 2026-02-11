@@ -11,6 +11,7 @@ import { formatDate } from "@/lib/utils";
 import { getCurrentUser } from "@/lib/auth-utils";
 import { ExternalLink, Github } from "lucide-react";
 import Link from "next/link";
+import { ResourceOwnerActions } from "@/components/resource/resource-owner-actions";
 
 export const dynamic = "force-dynamic";
 
@@ -79,22 +80,34 @@ export default async function ResourceDetailPage({ params }: PageProps) {
     ? resourceReviews.some((r) => r.userId === currentUser.id)
     : false;
 
+  const isOwnerOrAdmin =
+    currentUser &&
+    (currentUser.id === resource.authorId || currentUser.role === "admin");
+
   return (
     <div className="max-w-[1200px] mx-auto px-6 py-12">
       {/* Breadcrumb */}
-      <div className="text-sm text-text-muted mb-8">
-        <Link href="/browse" className="hover:text-primary transition-colors">
-          Browse
-        </Link>
-        <span className="mx-2">/</span>
-        <Link
-          href={`/browse?category=${resource.category}`}
-          className="hover:text-primary transition-colors"
-        >
-          {categoryLabels[resource.category]}
-        </Link>
-        <span className="mx-2">/</span>
-        <span className="text-text-main">{resource.name}</span>
+      <div className="flex items-center justify-between mb-8">
+        <div className="text-sm text-text-muted">
+          <Link href="/browse" className="hover:text-primary transition-colors">
+            Browse
+          </Link>
+          <span className="mx-2">/</span>
+          <Link
+            href={`/browse?category=${resource.category}`}
+            className="hover:text-primary transition-colors"
+          >
+            {categoryLabels[resource.category]}
+          </Link>
+          <span className="mx-2">/</span>
+          <span className="text-text-main">{resource.name}</span>
+        </div>
+        {isOwnerOrAdmin && (
+          <ResourceOwnerActions
+            resourceId={resource.id}
+            slug={resource.slug}
+          />
+        )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

@@ -10,7 +10,11 @@ export default auth((req) => {
   const isAdmin = req.auth?.user?.role === "admin";
 
   // Protected routes: require login
-  if (protectedRoutes.some((route) => pathname.startsWith(route))) {
+  const isEditRoute = /^\/resources\/[^/]+\/edit$/.test(pathname);
+  if (
+    protectedRoutes.some((route) => pathname.startsWith(route)) ||
+    isEditRoute
+  ) {
     if (!isLoggedIn) {
       return NextResponse.redirect(new URL("/login", req.url));
     }
@@ -30,5 +34,5 @@ export default auth((req) => {
 });
 
 export const config = {
-  matcher: ["/submit/:path*", "/profile/:path*", "/admin/:path*"],
+  matcher: ["/submit/:path*", "/profile/:path*", "/admin/:path*", "/resources/:path*/edit"],
 };

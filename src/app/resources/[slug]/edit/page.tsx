@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
-import { resources } from "@/lib/db/schema";
-import { eq } from "drizzle-orm";
+import { resources, resourceScreenshots } from "@/lib/db/schema";
+import { eq, asc } from "drizzle-orm";
 import { notFound, redirect } from "next/navigation";
 import { requireAuth } from "@/lib/auth-utils";
 import { ResourceEditForm } from "@/components/resource/resource-edit-form";
@@ -46,6 +46,16 @@ export default async function EditResourcePage({ params }: PageProps) {
     redirect(`/resources/${slug}`);
   }
 
+  const screenshots = await db
+    .select({
+      id: resourceScreenshots.id,
+      url: resourceScreenshots.url,
+      displayOrder: resourceScreenshots.displayOrder,
+    })
+    .from(resourceScreenshots)
+    .where(eq(resourceScreenshots.resourceId, resource.id))
+    .orderBy(asc(resourceScreenshots.displayOrder));
+
   return (
     <div className="max-w-2xl mx-auto px-6 py-12">
       <div className="text-sm text-text-muted mb-8">
@@ -60,7 +70,7 @@ export default async function EditResourcePage({ params }: PageProps) {
         automatically approved.
       </p>
 
-      <ResourceEditForm resource={resource} />
+      <ResourceEditForm resource={resource} screenshots={screenshots} />
     </div>
   );
 }

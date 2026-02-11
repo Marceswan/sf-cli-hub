@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Send, CheckCircle } from "lucide-react";
+import { Send, CheckCircle, ImagePlus, X } from "lucide-react";
+import Image from "next/image";
 
 const categories = [
   { value: "cli-plugins", label: "CLI Plugin" },
@@ -12,11 +13,31 @@ const categories = [
   { value: "apex-utilities", label: "Apex Utility" },
 ];
 
+const MAX_SCREENSHOTS = 5;
+
 export default function SubmitPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+  const [screenshotFiles, setScreenshotFiles] = useState<File[]>([]);
+  const [screenshotPreviews, setScreenshotPreviews] = useState<string[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  function addScreenshots(files: FileList | null) {
+    if (!files) return;
+    const remaining = MAX_SCREENSHOTS - screenshotFiles.length;
+    const newFiles = Array.from(files).slice(0, remaining);
+    const newPreviews = newFiles.map((f) => URL.createObjectURL(f));
+    setScreenshotFiles((prev) => [...prev, ...newFiles]);
+    setScreenshotPreviews((prev) => [...prev, ...newPreviews]);
+  }
+
+  function removeScreenshot(index: number) {
+    URL.revokeObjectURL(screenshotPreviews[index]);
+    setScreenshotFiles((prev) => prev.filter((_, i) => i !== index));
+    setScreenshotPreviews((prev) => prev.filter((_, i) => i !== index));
+  }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -27,7 +48,6 @@ export default function SubmitPage() {
     const data = {
       name: formData.get("name") as string,
       description: formData.get("description") as string,
-
       category: formData.get("category") as string,
       installCommand: formData.get("installCommand") as string,
       repositoryUrl: formData.get("repositoryUrl") as string,
@@ -38,6 +58,7 @@ export default function SubmitPage() {
     };
 
     try {
+      // Step 1: Create resource
       const res = await fetch("/api/resources", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -48,6 +69,24 @@ export default function SubmitPage() {
         const json = await res.json();
         setError(json.error || "Submission failed");
         return;
+      }
+
+      const resource = await res.json();
+
+      // Step 2: Upload screenshots one at a time
+      for (const file of screenshotFiles) {
+        const uploadForm = new FormData();
+        uploadForm.append("resourceId", resource.id);
+        uploadForm.append("file", file);
+
+        const uploadRes = await fetch("/api/uploads/screenshots", {
+          method: "POST",
+          body: uploadForm,
+        });
+
+        if (!uploadRes.ok) {
+          console.error("Screenshot upload failed:", await uploadRes.text());
+        }
       }
 
       setSuccess(true);
@@ -167,6 +206,58 @@ export default function SubmitPage() {
             label="Documentation URL"
             type="url"
             placeholder="https://..."
+          />
+        </div>
+
+        {/* Screenshots */}
+        <div className="space-y-1.5">
+          <label className="block text-sm font-medium">
+            Screenshots ({screenshotFiles.length}/{MAX_SCREENSHOTS})
+          </label>
+          <p className="text-xs text-text-muted">
+            Upload up to {MAX_SCREENSHOTS} screenshots. PNG, JPG, WebP, or GIF. Max 5 MB each.
+          </p>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-2">
+            {screenshotPreviews.map((src, i) => (
+              <div
+                key={i}
+                className="relative aspect-video rounded-lg overflow-hidden border border-border"
+              >
+                <Image
+                  src={src}
+                  alt={`Preview ${i + 1}`}
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 640px) 50vw, 33vw"
+                />
+                <button
+                  type="button"
+                  onClick={() => removeScreenshot(i)}
+                  className="absolute top-1 right-1 bg-black/60 text-white rounded-full p-0.5 hover:bg-black/80 transition-colors cursor-pointer"
+                  aria-label="Remove screenshot"
+                >
+                  <X size={14} />
+                </button>
+              </div>
+            ))}
+            {screenshotFiles.length < MAX_SCREENSHOTS && (
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="aspect-video rounded-lg border-2 border-dashed border-border hover:border-primary transition-colors flex flex-col items-center justify-center gap-1 text-text-muted hover:text-primary cursor-pointer"
+              >
+                <ImagePlus size={20} />
+                <span className="text-xs">Add</span>
+              </button>
+            )}
+          </div>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/png,image/jpeg,image/webp,image/gif"
+            multiple
+            className="hidden"
+            onChange={(e) => addScreenshots(e.target.files)}
           />
         </div>
 

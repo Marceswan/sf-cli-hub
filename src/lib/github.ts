@@ -1,6 +1,5 @@
 import { marked } from "marked";
-import { JSDOM } from "jsdom";
-import DOMPurify, { type WindowLike } from "dompurify";
+import sanitizeHtml from "sanitize-html";
 
 /**
  * Fetches a GitHub repo's README and returns sanitized HTML.
@@ -33,9 +32,20 @@ export async function fetchReadmeAsHtml(
     const markdown = Buffer.from(json.content, "base64").toString("utf-8");
     const html = await marked(markdown);
 
-    const window = new JSDOM("").window;
-    const purify = DOMPurify(window as unknown as WindowLike);
-    const sanitized = purify.sanitize(html);
+    const sanitized = sanitizeHtml(html, {
+      allowedTags: sanitizeHtml.defaults.allowedTags.concat([
+        "img",
+        "h1",
+        "h2",
+        "details",
+        "summary",
+      ]),
+      allowedAttributes: {
+        ...sanitizeHtml.defaults.allowedAttributes,
+        img: ["src", "alt", "width", "height"],
+        a: ["href", "name", "target", "rel"],
+      },
+    });
 
     return sanitized || null;
   } catch {

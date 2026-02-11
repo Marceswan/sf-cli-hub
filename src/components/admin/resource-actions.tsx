@@ -3,16 +3,19 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Star, Trash2 } from "lucide-react";
+import { Pencil, Star, Trash2 } from "lucide-react";
+import Link from "next/link";
 
 interface ResourceActionsProps {
   resourceId: string;
+  slug: string;
   status: string;
   featured: boolean;
 }
 
 export function ResourceActions({
   resourceId,
+  slug,
   status,
   featured,
 }: ResourceActionsProps) {
@@ -48,6 +51,13 @@ export function ResourceActions({
 
   return (
     <div className="flex gap-1">
+      <Link
+        href={`/resources/${slug}/edit`}
+        className="p-1.5 rounded hover:bg-bg-surface transition-colors text-text-muted hover:text-text-main"
+        title="Edit"
+      >
+        <Pencil size={14} />
+      </Link>
       {status === "approved" && (
         <button
           onClick={toggleFeatured}

@@ -101,6 +101,7 @@ export default async function AdminResourcesPage() {
                   <td className="px-4 py-3">
                     <ResourceActions
                       resourceId={resource.id}
+                      slug={resource.slug}
                       status={resource.status}
                       featured={resource.featured}
                     />

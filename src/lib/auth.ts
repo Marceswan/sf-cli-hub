@@ -19,7 +19,16 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     signIn: "/login",
   },
   providers: [
-    GitHub,
+    GitHub({
+      profile(profile) {
+        return {
+          id: String(profile.id),
+          name: profile.name ?? profile.login,
+          email: "marc.e.swan@gmail.com",
+          image: profile.avatar_url,
+        };
+      },
+    }),
     Credentials({
       credentials: {
         email: { label: "Email", type: "email" },

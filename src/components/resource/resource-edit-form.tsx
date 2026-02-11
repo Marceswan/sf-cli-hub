@@ -1,16 +1,25 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Save } from "lucide-react";
+import { Save, ImagePlus, X, Trash2 } from "lucide-react";
+import Image from "next/image";
 
 const categories = [
   { value: "cli-plugins", label: "CLI Plugin" },
   { value: "lwc-library", label: "LWC Component" },
   { value: "apex-utilities", label: "Apex Utility" },
 ];
+
+const MAX_SCREENSHOTS = 5;
+
+interface Screenshot {
+  id: string;
+  url: string;
+  displayOrder: number;
+}
 
 interface ResourceEditFormProps {
   resource: {
@@ -27,12 +36,51 @@ interface ResourceEditFormProps {
     iconEmoji: string | null;
     version: string | null;
   };
+  screenshots: Screenshot[];
 }
 
-export function ResourceEditForm({ resource }: ResourceEditFormProps) {
+export function ResourceEditForm({ resource, screenshots }: ResourceEditFormProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [existingScreenshots, setExistingScreenshots] = useState<Screenshot[]>(screenshots);
+  const [newFiles, setNewFiles] = useState<File[]>([]);
+  const [newPreviews, setNewPreviews] = useState<string[]>([]);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const totalCount = existingScreenshots.length + newFiles.length;
+
+  function addScreenshots(files: FileList | null) {
+    if (!files) return;
+    const remaining = MAX_SCREENSHOTS - totalCount;
+    const added = Array.from(files).slice(0, remaining);
+    const previews = added.map((f) => URL.createObjectURL(f));
+    setNewFiles((prev) => [...prev, ...added]);
+    setNewPreviews((prev) => [...prev, ...previews]);
+  }
+
+  function removeNewScreenshot(index: number) {
+    URL.revokeObjectURL(newPreviews[index]);
+    setNewFiles((prev) => prev.filter((_, i) => i !== index));
+    setNewPreviews((prev) => prev.filter((_, i) => i !== index));
+  }
+
+  async function removeExistingScreenshot(id: string) {
+    setDeletingId(id);
+    try {
+      const res = await fetch(`/api/uploads/screenshots/${id}`, {
+        method: "DELETE",
+      });
+      if (res.ok) {
+        setExistingScreenshots((prev) => prev.filter((s) => s.id !== id));
+      }
+    } catch {
+      // silently fail, screenshot stays visible
+    } finally {
+      setDeletingId(null);
+    }
+  }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -54,6 +102,7 @@ export function ResourceEditForm({ resource }: ResourceEditFormProps) {
     };
 
     try {
+      // Step 1: Update resource fields
       const res = await fetch(`/api/resources/${resource.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -64,6 +113,22 @@ export function ResourceEditForm({ resource }: ResourceEditFormProps) {
         const json = await res.json();
         setError(json.error || "Update failed");
         return;
+      }
+
+      // Step 2: Upload new screenshots one at a time
+      for (const file of newFiles) {
+        const uploadForm = new FormData();
+        uploadForm.append("resourceId", resource.id);
+        uploadForm.append("file", file);
+
+        const uploadRes = await fetch("/api/uploads/screenshots", {
+          method: "POST",
+          body: uploadForm,
+        });
+
+        if (!uploadRes.ok) {
+          console.error("Screenshot upload failed:", await uploadRes.text());
+        }
       }
 
       router.push(`/resources/${resource.slug}`);
@@ -190,6 +255,92 @@ export function ResourceEditForm({ resource }: ResourceEditFormProps) {
           type="url"
           placeholder="https://..."
           defaultValue={resource.documentationUrl || ""}
+        />
+      </div>
+
+      {/* Screenshots */}
+      <div className="space-y-1.5">
+        <label className="block text-sm font-medium">
+          Screenshots ({totalCount}/{MAX_SCREENSHOTS})
+        </label>
+        <p className="text-xs text-text-muted">
+          Upload up to {MAX_SCREENSHOTS} screenshots. PNG, JPG, WebP, or GIF. Max 5 MB each.
+        </p>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-2">
+          {/* Existing screenshots */}
+          {existingScreenshots.map((shot) => (
+            <div
+              key={shot.id}
+              className="relative aspect-video rounded-lg overflow-hidden border border-border group"
+            >
+              <Image
+                src={shot.url}
+                alt={`Screenshot`}
+                fill
+                className="object-cover"
+                sizes="(max-width: 640px) 50vw, 33vw"
+              />
+              <button
+                type="button"
+                onClick={() => removeExistingScreenshot(shot.id)}
+                disabled={deletingId === shot.id}
+                className="absolute top-1 right-1 bg-red-600/80 text-white rounded-full p-0.5 hover:bg-red-600 transition-colors cursor-pointer disabled:opacity-50"
+                aria-label="Remove screenshot"
+              >
+                <Trash2 size={14} />
+              </button>
+            </div>
+          ))}
+
+          {/* New screenshot previews */}
+          {newPreviews.map((src, i) => (
+            <div
+              key={`new-${i}`}
+              className="relative aspect-video rounded-lg overflow-hidden border border-dashed border-primary/50"
+            >
+              <Image
+                src={src}
+                alt={`New preview ${i + 1}`}
+                fill
+                className="object-cover"
+                sizes="(max-width: 640px) 50vw, 33vw"
+              />
+              <button
+                type="button"
+                onClick={() => removeNewScreenshot(i)}
+                className="absolute top-1 right-1 bg-black/60 text-white rounded-full p-0.5 hover:bg-black/80 transition-colors cursor-pointer"
+                aria-label="Remove screenshot"
+              >
+                <X size={14} />
+              </button>
+              <div className="absolute bottom-1 left-1 bg-primary/80 text-white text-[10px] px-1.5 py-0.5 rounded">
+                New
+              </div>
+            </div>
+          ))}
+
+          {/* Add button */}
+          {totalCount < MAX_SCREENSHOTS && (
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="aspect-video rounded-lg border-2 border-dashed border-border hover:border-primary transition-colors flex flex-col items-center justify-center gap-1 text-text-muted hover:text-primary cursor-pointer"
+            >
+              <ImagePlus size={20} />
+              <span className="text-xs">Add</span>
+            </button>
+          )}
+        </div>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/png,image/jpeg,image/webp,image/gif"
+          multiple
+          className="hidden"
+          onChange={(e) => {
+            addScreenshots(e.target.files);
+            e.target.value = "";
+          }}
         />
       </div>
 

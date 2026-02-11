@@ -1,12 +1,13 @@
 import { db } from "@/lib/db";
-import { resources, users, reviews } from "@/lib/db/schema";
-import { eq } from "drizzle-orm";
+import { resources, users, reviews, resourceScreenshots } from "@/lib/db/schema";
+import { eq, asc } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { StarRating } from "@/components/ui/star-rating";
 import { InstallCommand } from "@/components/resource/install-command";
 import { ReviewList } from "@/components/resource/review-list";
 import { ReviewForm } from "@/components/resource/review-form";
+import { ScreenshotGallery } from "@/components/resource/screenshot-gallery";
 import { formatDate } from "@/lib/utils";
 import { getCurrentUser } from "@/lib/auth-utils";
 import { ExternalLink, Github } from "lucide-react";
@@ -67,6 +68,17 @@ export default async function ResourceDetailPage({ params }: PageProps) {
     .from(reviews)
     .leftJoin(users, eq(reviews.userId, users.id))
     .where(eq(reviews.resourceId, resource.id));
+
+  const screenshots = await db
+    .select({
+      id: resourceScreenshots.id,
+      url: resourceScreenshots.url,
+      alt: resourceScreenshots.alt,
+      displayOrder: resourceScreenshots.displayOrder,
+    })
+    .from(resourceScreenshots)
+    .where(eq(resourceScreenshots.resourceId, resource.id))
+    .orderBy(asc(resourceScreenshots.displayOrder));
 
   const currentUser = await getCurrentUser();
 
@@ -138,6 +150,13 @@ export default async function ResourceDetailPage({ params }: PageProps) {
           </div>
 
           <p className="text-text-muted text-lg mb-8">{resource.description}</p>
+
+          {screenshots.length > 0 && (
+            <div className="mb-8">
+              <h2 className="text-lg font-semibold mb-3">Screenshots</h2>
+              <ScreenshotGallery screenshots={screenshots} />
+            </div>
+          )}
 
           {resource.installCommand && (
             <div className="mb-8">

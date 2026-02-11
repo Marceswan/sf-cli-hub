@@ -163,6 +163,19 @@ export const reviews = pgTable(
   ]
 );
 
+/* ─── Resource Screenshots ─── */
+export const resourceScreenshots = pgTable("resource_screenshots", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  resourceId: uuid("resource_id")
+    .notNull()
+    .references(() => resources.id, { onDelete: "cascade" }),
+  url: text("url").notNull(),
+  publicId: text("public_id").notNull(),
+  alt: varchar("alt", { length: 255 }),
+  displayOrder: integer("display_order").default(0).notNull(),
+  createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+});
+
 /* ─── Type exports ─── */
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
@@ -171,3 +184,5 @@ export type NewResource = typeof resources.$inferInsert;
 export type Review = typeof reviews.$inferSelect;
 export type NewReview = typeof reviews.$inferInsert;
 export type Tag = typeof tags.$inferSelect;
+export type ResourceScreenshot = typeof resourceScreenshots.$inferSelect;
+export type NewResourceScreenshot = typeof resourceScreenshots.$inferInsert;

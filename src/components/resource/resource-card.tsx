@@ -1,3 +1,6 @@
+"use client";
+
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Card, CardIcon, CardMeta } from "@/components/ui/card";
 import { StarRating } from "@/components/ui/star-rating";
@@ -34,12 +37,19 @@ export function ResourceCard({
   category,
   tags = [],
 }: ResourceCardProps) {
+  const router = useRouter();
   const isLwc = category === "lwc-library";
   const visibleTags = tags.slice(0, 3);
   const extraCount = tags.length - 3;
 
   return (
-    <Link href={`/resources/${slug}`}>
+    <div
+      role="link"
+      tabIndex={0}
+      onClick={() => router.push(`/resources/${slug}`)}
+      onKeyDown={(e) => { if (e.key === "Enter") router.push(`/resources/${slug}`); }}
+      className="cursor-pointer"
+    >
       <Card className="h-full">
         <div>
           {isLwc ? (
@@ -56,9 +66,15 @@ export function ResourceCard({
           {visibleTags.length > 0 && (
             <div className="flex flex-wrap gap-1.5 mb-4">
               {visibleTags.map((t) => (
-                <Badge key={t.id} variant="primary" className="text-[10px] px-2 py-0">
-                  {t.name}
-                </Badge>
+                <Link
+                  key={t.id}
+                  href={`/browse?tag=${t.slug}`}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <Badge variant="primary" className="text-[10px] px-2 py-0 hover:opacity-80 transition-opacity">
+                    {t.name}
+                  </Badge>
+                </Link>
               ))}
               {extraCount > 0 && (
                 <Badge className="text-[10px] px-2 py-0">+{extraCount}</Badge>
@@ -82,6 +98,6 @@ export function ResourceCard({
           </span>
         </CardMeta>
       </Card>
-    </Link>
+    </div>
   );
 }

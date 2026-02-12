@@ -52,7 +52,7 @@ export async function fetchReadmeAsHtml(
       {
         headers: {
           Accept: "application/vnd.github.v3+json",
-          "User-Agent": "sf-cli-hub",
+          "User-Agent": "sfdxhub",
         },
       }
     );

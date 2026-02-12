@@ -4,6 +4,7 @@ import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { EmojiPicker } from "@/components/ui/emoji-picker";
 import { Save, ImagePlus, X, Trash2 } from "lucide-react";
 import Image from "next/image";
 
@@ -186,14 +187,7 @@ export function ResourceEditForm({ resource, screenshots }: ResourceEditFormProp
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <Input
-          id="iconEmoji"
-          name="iconEmoji"
-          label="Icon Emoji"
-          placeholder="⚡"
-          maxLength={10}
-          defaultValue={resource.iconEmoji || ""}
-        />
+        <EmojiPicker name="iconEmoji" label="Icon Emoji" defaultValue={resource.iconEmoji || ""} />
         <Input
           id="version"
           name="version"

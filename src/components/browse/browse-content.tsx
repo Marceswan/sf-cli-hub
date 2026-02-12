@@ -28,6 +28,7 @@ interface ResourceItem {
   version: string | null;
   avgRating: string | null;
   reviewsCount: number;
+  createdAt: string;
   tags?: TagInfo[];
 }
 
@@ -138,6 +139,7 @@ export function BrowseContent() {
                 reviewsCount={resource.reviewsCount}
                 category={resource.category}
                 tags={resource.tags}
+                createdAt={resource.createdAt}
               />
             ))}
           </div>

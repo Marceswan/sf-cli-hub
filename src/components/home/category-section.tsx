@@ -14,6 +14,8 @@ interface CategoryResource {
   avgRating?: number;
   reviewsCount?: number;
   category?: string;
+  tags?: { id: string; name: string; slug: string }[];
+  createdAt?: string;
 }
 
 interface CategorySectionProps {

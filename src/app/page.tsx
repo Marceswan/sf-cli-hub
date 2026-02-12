@@ -22,6 +22,7 @@ async function getTopResources(category: CategorySlug, limit = 3) {
       avgRating: resources.avgRating,
       reviewsCount: resources.reviewsCount,
       category: resources.category,
+      createdAt: resources.createdAt,
     })
     .from(resources)
     .where(and(eq(resources.category, category), eq(resources.status, "approved")))
@@ -61,6 +62,7 @@ async function getTopResources(category: CategorySlug, limit = 3) {
     reviewsCount: r.reviewsCount,
     category: r.category,
     tags: tagMap[r.id] || [],
+    createdAt: r.createdAt.toISOString(),
   }));
 }
 

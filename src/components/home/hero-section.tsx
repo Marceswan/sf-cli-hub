@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { TerminalAnimation } from "./terminal-animation";
+import { TypingRotator } from "./typing-rotator";
 import { useGsapEntrance } from "@/hooks/use-gsap";
 
 export function HeroSection() {
@@ -26,7 +27,7 @@ export function HeroSection() {
         {/* Heading */}
         <h1 data-animate className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-[1.1] mb-6">
           Supercharge your <br />
-          <span className="gradient-text">Salesforce Workflow</span>
+          Salesforce <TypingRotator /> Workflow
         </h1>
 
         {/* Subtitle */}

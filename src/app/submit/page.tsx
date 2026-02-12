@@ -4,6 +4,7 @@ import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { EmojiPicker } from "@/components/ui/emoji-picker";
 import { Send, CheckCircle, ImagePlus, X } from "lucide-react";
 import Image from "next/image";
 
@@ -162,13 +163,7 @@ export default function SubmitPage() {
 
         {/* Optional fields */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <Input
-            id="iconEmoji"
-            name="iconEmoji"
-            label="Icon Emoji"
-            placeholder="⚡"
-            maxLength={10}
-          />
+          <EmojiPicker name="iconEmoji" label="Icon Emoji" />
           <Input
             id="version"
             name="version"

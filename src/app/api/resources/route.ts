@@ -70,7 +70,7 @@ export async function GET(req: Request) {
           avgRating: resources.avgRating,
           reviewsCount: resources.reviewsCount,
           createdAt: resources.createdAt,
-          authorName: users.name,
+          authorName: sql<string>`COALESCE(${resources.authorName}, ${users.name})`,
           authorImage: users.image,
         })
         .from(resources)
@@ -153,6 +153,7 @@ export async function POST(req: Request) {
         documentationUrl: data.documentationUrl || null,
         iconEmoji: data.iconEmoji || "📦",
         authorId: session.user.id,
+        authorName: data.authorName || null,
         status: "pending",
       })
       .returning();

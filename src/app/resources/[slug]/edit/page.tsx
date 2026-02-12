@@ -31,6 +31,7 @@ export default async function EditResourcePage({ params }: PageProps) {
       iconEmoji: resources.iconEmoji,
       version: resources.version,
       authorId: resources.authorId,
+      authorName: resources.authorName,
     })
     .from(resources)
     .where(eq(resources.slug, slug))

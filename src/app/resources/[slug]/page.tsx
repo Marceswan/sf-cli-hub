@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
 import { resources, users, reviews, resourceScreenshots } from "@/lib/db/schema";
-import { eq, asc } from "drizzle-orm";
+import { eq, asc, sql } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { StarRating } from "@/components/ui/star-rating";
@@ -42,7 +42,7 @@ export default async function ResourceDetailPage({ params }: PageProps) {
       reviewsCount: resources.reviewsCount,
       createdAt: resources.createdAt,
       authorId: resources.authorId,
-      authorName: users.name,
+      authorName: sql<string>`COALESCE(${resources.authorName}, ${users.name})`,
       authorImage: users.image,
     })
     .from(resources)

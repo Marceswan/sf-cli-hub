@@ -105,6 +105,7 @@ export const resources = pgTable(
     authorId: uuid("author_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
+    authorName: varchar("author_name", { length: 255 }),
     status: resourceStatusEnum("status").default("pending").notNull(),
     featured: boolean("featured").default(false).notNull(),
     avgRating: decimal("avg_rating", { precision: 3, scale: 2 }).default("0"),

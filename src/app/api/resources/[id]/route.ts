@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { resources, users, reviews } from "@/lib/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { fetchReadmeAsHtml, markdownToSafeHtml } from "@/lib/github";
 
@@ -32,7 +32,7 @@ export async function GET(
         reviewsCount: resources.reviewsCount,
         createdAt: resources.createdAt,
         authorId: resources.authorId,
-        authorName: users.name,
+        authorName: sql<string>`COALESCE(${resources.authorName}, ${users.name})`,
         authorImage: users.image,
       })
       .from(resources)
@@ -121,6 +121,7 @@ export async function PATCH(
       "documentationUrl",
       "iconEmoji",
       "version",
+      "authorName",
     ] as const;
 
     for (const field of editableFields) {

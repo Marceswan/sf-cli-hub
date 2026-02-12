@@ -3,10 +3,10 @@
 import { useEffect, useState } from "react";
 
 const lines = [
-  { prompt: true, text: "sfdx plugins:install @salesforce/sfdx-scanner" },
-  { prompt: false, text: "> Installing plugin @salesforce/sfdx-scanner... installed v3.0.0" },
-  { prompt: true, text: 'sfdx hub:explore --category="lwc"' },
-  { prompt: false, text: "> Found 24 components matching your criteria" },
+  { prompt: true, text: "sf plugins install sf-cli-migrator" },
+  { prompt: false, text: "> Installing sf-cli-migrator... installed v1.2.0" },
+  { prompt: true, text: "sf migrator decompose --target-dir src" },
+  { prompt: false, text: "> Decomposed 48 metadata files into source format" },
 ];
 
 export function TerminalAnimation() {

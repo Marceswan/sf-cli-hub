@@ -150,7 +150,9 @@ export default async function ResourceDetailPage({ params }: PageProps) {
               <div className="flex items-center gap-3 mt-2 flex-wrap">
                 <Badge>{categoryLabels[resource.category]}</Badge>
                 {resourceTagRows.map((t) => (
-                  <Badge key={t.id} variant="primary">{t.name}</Badge>
+                  <Link key={t.id} href={`/browse?tag=${t.slug}`}>
+                    <Badge variant="primary" className="hover:opacity-80 transition-opacity">{t.name}</Badge>
+                  </Link>
                 ))}
                 {resource.version && (
                   <Badge variant="primary">v{resource.version}</Badge>
@@ -235,9 +237,11 @@ export default async function ResourceDetailPage({ params }: PageProps) {
                   <dt className="text-text-muted mb-1.5">Tags</dt>
                   <dd className="flex flex-wrap gap-1.5">
                     {resourceTagRows.map((t) => (
-                      <Badge key={t.id} variant="primary" className="text-[10px] px-2">
-                        {t.name}
-                      </Badge>
+                      <Link key={t.id} href={`/browse?tag=${t.slug}`}>
+                        <Badge variant="primary" className="text-[10px] px-2 hover:opacity-80 transition-opacity">
+                          {t.name}
+                        </Badge>
+                      </Link>
                     ))}
                   </dd>
                 </div>

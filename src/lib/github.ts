@@ -35,6 +35,7 @@ export async function markdownToSafeHtml(
 /**
  * Fetches a GitHub repo's README and returns sanitized HTML.
  * Returns null on any failure (private repo, no README, network error).
+ * Uses GITHUB_TOKEN env var when available for higher rate limits.
  */
 export async function fetchReadmeAsHtml(
   repositoryUrl: string
@@ -47,26 +48,48 @@ export async function fetchReadmeAsHtml(
 
     const [, owner, repo] = match;
 
+    const headers: Record<string, string> = {
+      Accept: "application/vnd.github.v3+json",
+      "User-Agent": "sfdxhub",
+    };
+    if (process.env.GITHUB_TOKEN) {
+      headers.Authorization = `Bearer ${process.env.GITHUB_TOKEN}`;
+    }
+
     const res = await fetch(
       `https://api.github.com/repos/${owner}/${repo}/readme`,
-      {
-        headers: {
-          Accept: "application/vnd.github.v3+json",
-          "User-Agent": "sfdxhub",
-        },
-      }
+      { headers }
     );
 
-    if (!res.ok) return null;
+    if (!res.ok) {
+      console.error(`[fetchReadmeAsHtml] GitHub API ${res.status} for ${owner}/${repo}`);
+      return null;
+    }
 
     const json = await res.json();
-    const markdown = Buffer.from(json.content, "base64").toString("utf-8");
-    const html = await marked(markdown);
 
+    // Decode base64 content; fall back to download_url for large files
+    let markdown: string;
+    if (json.content) {
+      markdown = Buffer.from(json.content, "base64").toString("utf-8");
+    } else if (json.download_url) {
+      const rawRes = await fetch(json.download_url);
+      if (!rawRes.ok) {
+        console.error(`[fetchReadmeAsHtml] download_url fetch ${rawRes.status}`);
+        return null;
+      }
+      markdown = await rawRes.text();
+    } else {
+      console.error("[fetchReadmeAsHtml] No content or download_url in response");
+      return null;
+    }
+
+    const html = await marked(markdown);
     const sanitized = sanitizeHtml(html, SANITIZE_OPTIONS);
 
     return sanitized || null;
-  } catch {
+  } catch (err) {
+    console.error("[fetchReadmeAsHtml] Error:", err);
     return null;
   }
 }

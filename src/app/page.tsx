@@ -1,146 +1,102 @@
+import { db } from "@/lib/db";
+import { resources, resourceTags, tags } from "@/lib/db/schema";
+import { eq, and, desc, inArray } from "drizzle-orm";
 import { HeroSection } from "@/components/home/hero-section";
 import { CategorySection } from "@/components/home/category-section";
 import { ContentBand } from "@/components/layout/content-band";
 
-const cliPlugins = [
-  {
-    slug: "sfdx-hard-hat",
-    name: "SFDX Hard Hat",
-    description:
-      "Enhances metadata deployment with automatic dependency resolution and conflict checks.",
-    iconEmoji: "⚡",
-    installCommand: "npm i sfdx-hard-hat",
-    avgRating: 4.8,
-    reviewsCount: 128,
-    category: "cli-plugins",
-  },
-  {
-    slug: "code-analyzer-pro",
-    name: "Code Analyzer Pro",
-    description:
-      "Advanced static analysis for Apex and LWC that integrates directly into your CI/CD pipeline.",
-    iconEmoji: "🔍",
-    installCommand: "npm i sfdx-scanner-pro",
-    avgRating: 4.5,
-    reviewsCount: 84,
-    category: "cli-plugins",
-  },
-  {
-    slug: "data-mover-x",
-    name: "Data Mover X",
-    description:
-      "Extract, transform, and load record data between orgs while maintaining relationships.",
-    iconEmoji: "💾",
-    installCommand: "npm i sfdx-dmx",
-    avgRating: 4.9,
-    reviewsCount: 210,
-    category: "cli-plugins",
-  },
+export const dynamic = "force-dynamic";
+
+type CategorySlug = "cli-plugins" | "lwc-library" | "apex-utilities" | "agentforce" | "flow" | "experience-cloud";
+
+async function getTopResources(category: CategorySlug, limit = 3) {
+  const rows = await db
+    .select({
+      id: resources.id,
+      slug: resources.slug,
+      name: resources.name,
+      description: resources.description,
+      iconEmoji: resources.iconEmoji,
+      installCommand: resources.installCommand,
+      version: resources.version,
+      avgRating: resources.avgRating,
+      reviewsCount: resources.reviewsCount,
+      category: resources.category,
+    })
+    .from(resources)
+    .where(and(eq(resources.category, category), eq(resources.status, "approved")))
+    .orderBy(desc(resources.createdAt))
+    .limit(limit);
+
+  // Batch-fetch tags
+  const ids = rows.map((r) => r.id);
+  let tagMap: Record<string, { id: string; name: string; slug: string }[]> = {};
+  if (ids.length > 0) {
+    const tagRows = await db
+      .select({
+        resourceId: resourceTags.resourceId,
+        tagId: tags.id,
+        tagName: tags.name,
+        tagSlug: tags.slug,
+      })
+      .from(resourceTags)
+      .innerJoin(tags, eq(resourceTags.tagId, tags.id))
+      .where(inArray(resourceTags.resourceId, ids));
+
+    tagMap = tagRows.reduce((acc, row) => {
+      if (!acc[row.resourceId]) acc[row.resourceId] = [];
+      acc[row.resourceId].push({ id: row.tagId, name: row.tagName, slug: row.tagSlug });
+      return acc;
+    }, {} as typeof tagMap);
+  }
+
+  return rows.map((r) => ({
+    slug: r.slug,
+    name: r.name,
+    description: r.description,
+    iconEmoji: r.iconEmoji,
+    installCommand: r.installCommand || undefined,
+    version: r.version || undefined,
+    avgRating: r.avgRating ? parseFloat(r.avgRating) : 0,
+    reviewsCount: r.reviewsCount,
+    category: r.category,
+    tags: tagMap[r.id] || [],
+  }));
+}
+
+const sections = [
+  { category: "cli-plugins" as CategorySlug, title: "CLI Power-Ups", subtitle: "Extend your terminal capabilities.", variant: "filled" as const },
+  { category: "lwc-library" as CategorySlug, title: "LWC Blueprint", subtitle: "Drop-in UI components for your org.", variant: "default" as const },
+  { category: "apex-utilities" as CategorySlug, title: "Apex Utilities", subtitle: "Battle-tested classes and frameworks.", variant: "filled" as const },
+  { category: "agentforce" as CategorySlug, title: "Agentforce", subtitle: "AI-powered agent tools and extensions.", variant: "default" as const },
+  { category: "flow" as CategorySlug, title: "Flow", subtitle: "Automation components and templates.", variant: "filled" as const },
+  { category: "experience-cloud" as CategorySlug, title: "Experience Cloud", subtitle: "Components for portals and communities.", variant: "default" as const },
 ];
 
-const lwcComponents = [
-  {
-    slug: "super-datatable",
-    name: "Super Datatable",
-    description:
-      "A wrapper around lightning-datatable supporting inline edit, pagination, and mass actions.",
-    iconEmoji: "📊",
-    version: "1.0.4",
-    avgRating: 4.7,
-    reviewsCount: 96,
-    category: "lwc-library",
-  },
-  {
-    slug: "illustration-picker",
-    name: "Illustration Picker",
-    description:
-      "Allow admins to select Salesforce SLDS illustrations dynamically in App Builder.",
-    iconEmoji: "🎨",
-    version: "2.1.0",
-    avgRating: 4.3,
-    reviewsCount: 52,
-    category: "lwc-library",
-  },
-  {
-    slug: "code-snippet-viewer",
-    name: "Code Snippet Viewer",
-    description:
-      "PrismJS integration for displaying highlighted code blocks within Experience Cloud.",
-    iconEmoji: "💻",
-    version: "0.9.5",
-    avgRating: 4.1,
-    reviewsCount: 34,
-    category: "lwc-library",
-  },
-];
+export default async function HomePage() {
+  const categoryData = await Promise.all(
+    sections.map((s) => getTopResources(s.category))
+  );
 
-const apexUtils = [
-  {
-    slug: "apex-trigger-framework",
-    name: "Trigger Framework",
-    description:
-      "Lightweight, governor-friendly trigger framework with built-in recursion prevention.",
-    iconEmoji: "🏗️",
-    installCommand: "sfdx force:source:deploy -p force-app",
-    avgRating: 4.9,
-    reviewsCount: 312,
-    category: "apex-utilities",
-  },
-  {
-    slug: "apex-test-factory",
-    name: "Test Data Factory",
-    description:
-      "Fluent API for creating test records with all required fields and relationship lookups.",
-    iconEmoji: "🧪",
-    installCommand: "sfdx force:source:deploy -p force-app",
-    avgRating: 4.6,
-    reviewsCount: 178,
-    category: "apex-utilities",
-  },
-  {
-    slug: "apex-collection-utils",
-    name: "Collection Utils",
-    description:
-      "Functional programming helpers for Lists, Sets, and Maps — filter, map, group, and pluck.",
-    iconEmoji: "🧰",
-    installCommand: "sfdx force:source:deploy -p force-app",
-    avgRating: 4.4,
-    reviewsCount: 89,
-    category: "apex-utilities",
-  },
-];
+  // Only render sections that have at least 1 resource
+  const activeSections = sections
+    .map((s, i) => ({ ...s, resources: categoryData[i] }))
+    .filter((s) => s.resources.length > 0);
 
-export default function HomePage() {
   return (
     <>
       <HeroSection />
 
-      <ContentBand variant="filled">
-        <CategorySection
-          title="CLI Power-Ups"
-          subtitle="Extend your terminal capabilities."
-          viewAllHref="/browse?category=cli-plugins"
-          resources={cliPlugins}
-        />
-      </ContentBand>
-
-      <ContentBand variant="default">
-        <CategorySection
-          title="LWC Blueprint"
-          subtitle="Drop-in UI components for your org."
-          viewAllHref="/browse?category=lwc-library"
-          resources={lwcComponents}
-        />
-      </ContentBand>
-
-      <ContentBand variant="filled">
-        <CategorySection
-          title="Apex Utilities"
-          subtitle="Battle-tested classes and frameworks."
-          viewAllHref="/browse?category=apex-utilities"
-          resources={apexUtils}
-        />
-      </ContentBand>
+      {activeSections.map((section) => (
+        <ContentBand key={section.category} variant={section.variant}>
+          <CategorySection
+            title={section.title}
+            subtitle={section.subtitle}
+            viewAllHref={`/browse?category=${section.category}`}
+            resources={section.resources}
+          />
+        </ContentBand>
+      ))}
     </>
   );
 }

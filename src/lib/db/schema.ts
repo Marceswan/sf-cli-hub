@@ -180,6 +180,12 @@ export const resourceScreenshots = pgTable("resource_screenshots", {
   createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
 });
 
+/* ─── Site Settings (single-row config) ─── */
+export const siteSettings = pgTable("site_settings", {
+  id: integer("id").primaryKey().default(1),
+  requireApproval: boolean("require_approval").default(true).notNull(),
+});
+
 /* ─── Type exports ─── */
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;

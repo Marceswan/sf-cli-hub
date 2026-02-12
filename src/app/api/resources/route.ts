@@ -6,6 +6,7 @@ import { auth } from "@/lib/auth";
 import { resourceSchema } from "@/lib/validators";
 import { slugify } from "@/lib/utils";
 import { fetchReadmeAsHtml, markdownToSafeHtml } from "@/lib/github";
+import { getRequireApproval } from "@/lib/settings";
 
 export async function GET(req: Request) {
   try {
@@ -200,7 +201,7 @@ export async function POST(req: Request) {
         iconEmoji: resourceData.iconEmoji || "📦",
         authorId: session.user.id,
         authorName: resourceData.authorName || null,
-        status: "pending",
+        status: (await getRequireApproval()) ? "pending" : "approved",
       })
       .returning();
 

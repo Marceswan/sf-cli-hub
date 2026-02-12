@@ -11,6 +11,9 @@ const navLinks = [
   { href: "/browse?category=cli-plugins", label: "CLI Plugins" },
   { href: "/browse?category=lwc-library", label: "LWC Library" },
   { href: "/browse?category=apex-utilities", label: "Apex Utilities" },
+  { href: "/browse?category=agentforce", label: "Agentforce" },
+  { href: "/browse?category=flow", label: "Flow" },
+  { href: "/browse?category=experience-cloud", label: "Experience Cloud" },
 ];
 
 export function Header() {

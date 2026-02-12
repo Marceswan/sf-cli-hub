@@ -56,6 +56,9 @@ export default async function AdminResourcesPage() {
     "cli-plugins": "CLI",
     "lwc-library": "LWC",
     "apex-utilities": "Apex",
+    "agentforce": "Agent",
+    "flow": "Flow",
+    "experience-cloud": "ExpCloud",
   };
 
   return (

@@ -13,6 +13,9 @@ const categories = [
   { value: "cli-plugins", label: "CLI Plugin" },
   { value: "lwc-library", label: "LWC Component" },
   { value: "apex-utilities", label: "Apex Utility" },
+  { value: "agentforce", label: "Agentforce" },
+  { value: "flow", label: "Flow" },
+  { value: "experience-cloud", label: "Experience Cloud" },
 ];
 
 const MAX_SCREENSHOTS = 5;

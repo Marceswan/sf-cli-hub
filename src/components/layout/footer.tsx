@@ -39,6 +39,21 @@ export function Footer() {
                   Apex Utilities
                 </Link>
               </li>
+              <li>
+                <Link href="/browse?category=agentforce" className="hover:text-primary transition-colors">
+                  Agentforce
+                </Link>
+              </li>
+              <li>
+                <Link href="/browse?category=flow" className="hover:text-primary transition-colors">
+                  Flow
+                </Link>
+              </li>
+              <li>
+                <Link href="/browse?category=experience-cloud" className="hover:text-primary transition-colors">
+                  Experience Cloud
+                </Link>
+              </li>
             </ul>
           </div>
 

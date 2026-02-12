@@ -18,7 +18,7 @@ export const resourceSchema = z.object({
     .min(10, "Description must be at least 10 characters")
     .max(500),
   longDescription: z.string().optional(),
-  category: z.enum(["cli-plugins", "lwc-library", "apex-utilities"]),
+  category: z.enum(["cli-plugins", "lwc-library", "apex-utilities", "agentforce", "flow", "experience-cloud"]),
   installCommand: z.string().optional(),
   repositoryUrl: z.string().url("Must be a valid URL").optional().or(z.literal("")),
   npmUrl: z.string().url("Must be a valid URL").optional().or(z.literal("")),

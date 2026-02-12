@@ -50,6 +50,9 @@ export default async function SubmissionsPage() {
     "cli-plugins": "CLI Plugin",
     "lwc-library": "LWC Component",
     "apex-utilities": "Apex Utility",
+    "agentforce": "Agentforce",
+    "flow": "Flow",
+    "experience-cloud": "Experience Cloud",
   };
 
   return (

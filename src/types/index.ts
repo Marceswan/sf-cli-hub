@@ -24,6 +24,6 @@ declare module "@auth/core/jwt" {
   }
 }
 
-export type ResourceCategory = "cli-plugins" | "lwc-library" | "apex-utilities";
+export type ResourceCategory = "cli-plugins" | "lwc-library" | "apex-utilities" | "agentforce" | "flow" | "experience-cloud";
 export type ResourceStatus = "pending" | "approved" | "rejected";
 export type UserRole = "user" | "admin";

@@ -97,6 +97,9 @@ export default async function ResourceDetailPage({ params }: PageProps) {
     "cli-plugins": "CLI Plugin",
     "lwc-library": "LWC Component",
     "apex-utilities": "Apex Utility",
+    "agentforce": "Agentforce",
+    "flow": "Flow",
+    "experience-cloud": "Experience Cloud",
   };
 
   const hasReviewed = currentUser

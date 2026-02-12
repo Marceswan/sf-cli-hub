@@ -19,6 +19,9 @@ export const resourceCategoryEnum = pgEnum("resource_category", [
   "cli-plugins",
   "lwc-library",
   "apex-utilities",
+  "agentforce",
+  "flow",
+  "experience-cloud",
 ]);
 export const resourceStatusEnum = pgEnum("resource_status", [
   "pending",

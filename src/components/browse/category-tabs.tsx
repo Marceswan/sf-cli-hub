@@ -7,6 +7,9 @@ const categories = [
   { value: "cli-plugins", label: "CLI Plugins" },
   { value: "lwc-library", label: "LWC Library" },
   { value: "apex-utilities", label: "Apex Utilities" },
+  { value: "agentforce", label: "Agentforce" },
+  { value: "flow", label: "Flow" },
+  { value: "experience-cloud", label: "Experience Cloud" },
 ];
 
 interface CategoryTabsProps {

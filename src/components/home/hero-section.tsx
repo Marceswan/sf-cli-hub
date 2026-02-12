@@ -39,12 +39,12 @@ export function HeroSection() {
         <div data-animate className="flex justify-center gap-4 flex-wrap">
           <Link href="/browse">
             <Button variant="primary" size="md">
-              Browse Extensions
+              Browse Tools
             </Button>
           </Link>
           <Link href="/submit">
             <Button variant="secondary" size="md">
-              Submit Plugin
+              Submit Resource
             </Button>
           </Link>
         </div>

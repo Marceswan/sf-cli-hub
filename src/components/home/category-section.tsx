@@ -1,5 +1,8 @@
+"use client";
+
 import Link from "next/link";
 import { ResourceCard } from "@/components/resource/resource-card";
+import { useGsapFadeIn } from "@/hooks/use-gsap";
 
 interface CategoryResource {
   slug: string;
@@ -26,9 +29,17 @@ export function CategorySection({
   viewAllHref,
   resources,
 }: CategorySectionProps) {
+  const headerRef = useGsapFadeIn({ y: 20, duration: 0.6 });
+  const gridRef = useGsapFadeIn({
+    y: 40,
+    stagger: 0.1,
+    childSelector: "[data-card]",
+    start: "top 88%",
+  });
+
   return (
-    <section className="max-w-[1200px] mx-auto px-6 py-16">
-      <div className="flex justify-between items-end mb-8 border-b border-border pb-4">
+    <div>
+      <div ref={headerRef} className="flex justify-between items-end mb-8">
         <div>
           <h2 className="text-2xl font-bold">{title}</h2>
           <p className="text-text-muted">{subtitle}</p>
@@ -41,11 +52,16 @@ export function CategorySection({
         </Link>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div
+        ref={gridRef}
+        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+      >
         {resources.map((resource) => (
-          <ResourceCard key={resource.slug} {...resource} />
+          <div key={resource.slug} data-card>
+            <ResourceCard {...resource} />
+          </div>
         ))}
       </div>
-    </section>
+    </div>
   );
 }

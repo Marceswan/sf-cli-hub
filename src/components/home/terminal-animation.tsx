@@ -27,8 +27,8 @@ export function TerminalAnimation() {
         {lines.slice(0, visibleLines).map((line, i) => (
           <div
             key={i}
-            className="animate-fade-in"
-            style={{ animationDelay: `${i * 100}ms` }}
+            className="opacity-0 animate-fade-in"
+            style={{ animationDelay: `${i * 150}ms` }}
           >
             {line.prompt ? (
               <span>

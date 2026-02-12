@@ -29,11 +29,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${inter.variable} ${jetbrainsMono.variable} antialiased`}>
+      <body className={`${inter.variable} ${jetbrainsMono.variable} antialiased flex flex-col min-h-svh`}>
         <SessionProvider>
           <ThemeProvider>
             <Header />
-            <main className="min-h-screen pt-[70px]">{children}</main>
+            <main className="flex-1 flex flex-col pt-[70px]">{children}</main>
             <Footer />
           </ThemeProvider>
         </SessionProvider>

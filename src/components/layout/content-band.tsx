@@ -19,7 +19,11 @@ export function ContentBand({
         className
       )}
     >
-      <div className="max-w-[1200px] mx-auto px-6 py-16">{children}</div>
+      <div className="grid grid-cols-[1fr_minmax(0,1200px)_1fr]">
+        <div className="max-sm:hidden grid-line-pattern" />
+        <div className="col-start-2 px-6 py-16">{children}</div>
+        <div className="max-sm:hidden grid-line-pattern" />
+      </div>
     </section>
   );
 }

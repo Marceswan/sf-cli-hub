@@ -97,7 +97,9 @@ export default async function ResourceDetailPage({ params }: PageProps) {
     (currentUser.id === resource.authorId || currentUser.role === "admin");
 
   return (
-    <div className="max-w-[1200px] mx-auto px-6 py-12">
+    <div className="grid grid-cols-[1fr_minmax(0,1200px)_1fr]">
+      <div className="max-sm:hidden grid-line-pattern" />
+      <div className="col-start-2 px-6 py-12">
       {/* Breadcrumb */}
       <div className="flex items-center justify-between mb-8">
         <div className="text-sm text-text-muted">
@@ -254,6 +256,8 @@ export default async function ResourceDetailPage({ params }: PageProps) {
           </div>
         </div>
       </div>
+      </div>
+      <div className="max-sm:hidden grid-line-pattern" />
     </div>
   );
 }

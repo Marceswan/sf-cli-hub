@@ -56,6 +56,7 @@ export default function SubmitPage() {
       documentationUrl: formData.get("documentationUrl") as string,
       iconEmoji: formData.get("iconEmoji") as string,
       version: formData.get("version") as string,
+      authorName: (formData.get("authorName") as string) || undefined,
     };
 
     try {
@@ -125,6 +126,12 @@ export default function SubmitPage() {
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Required fields */}
         <Input id="name" name="name" label="Tool Name" required />
+        <Input
+          id="authorName"
+          name="authorName"
+          label="Author"
+          placeholder="Leave blank to use your account name"
+        />
 
         <div className="space-y-1.5">
           <label htmlFor="category" className="block text-sm font-medium">

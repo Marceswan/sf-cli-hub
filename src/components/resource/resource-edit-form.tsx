@@ -36,6 +36,7 @@ interface ResourceEditFormProps {
     documentationUrl: string | null;
     iconEmoji: string | null;
     version: string | null;
+    authorName: string | null;
   };
   screenshots: Screenshot[];
 }
@@ -100,6 +101,7 @@ export function ResourceEditForm({ resource, screenshots }: ResourceEditFormProp
       documentationUrl: formData.get("documentationUrl") as string,
       iconEmoji: formData.get("iconEmoji") as string,
       version: formData.get("version") as string,
+      authorName: (formData.get("authorName") as string) || undefined,
     };
 
     try {
@@ -149,6 +151,14 @@ export function ResourceEditForm({ resource, screenshots }: ResourceEditFormProp
         label="Tool Name"
         required
         defaultValue={resource.name}
+      />
+
+      <Input
+        id="authorName"
+        name="authorName"
+        label="Author"
+        placeholder="Leave blank to use your account name"
+        defaultValue={resource.authorName || ""}
       />
 
       <div className="space-y-1.5">

@@ -19,7 +19,7 @@ export default async function AdminResourcesPage() {
       avgRating: resources.avgRating,
       reviewsCount: resources.reviewsCount,
       createdAt: resources.createdAt,
-      authorName: users.name,
+      authorName: sql<string>`COALESCE(${resources.authorName}, ${users.name})`,
     })
     .from(resources)
     .leftJoin(users, eq(resources.authorId, users.id))

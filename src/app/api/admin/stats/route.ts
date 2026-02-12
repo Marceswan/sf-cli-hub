@@ -49,7 +49,7 @@ export async function GET() {
         category: resources.category,
         status: resources.status,
         createdAt: resources.createdAt,
-        authorName: users.name,
+        authorName: sql<string>`COALESCE(${resources.authorName}, ${users.name})`,
       })
       .from(resources)
       .leftJoin(users, eq(resources.authorId, users.id))

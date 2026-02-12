@@ -25,6 +25,7 @@ export const resourceSchema = z.object({
   documentationUrl: z.string().url("Must be a valid URL").optional().or(z.literal("")),
   iconEmoji: z.string().max(10).optional(),
   version: z.string().max(50).optional(),
+  authorName: z.string().max(255).optional(),
 });
 
 export const reviewSchema = z.object({

@@ -17,7 +17,7 @@ export default async function SubmissionsPage() {
       category: resources.category,
       status: resources.status,
       createdAt: resources.createdAt,
-      authorName: users.name,
+      authorName: sql<string>`COALESCE(${resources.authorName}, ${users.name})`,
       authorEmail: users.email,
     })
     .from(resources)

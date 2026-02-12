@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import { resources, resourceTags, tags } from "@/lib/db/schema";
+import { resources, resourceTags, tags, siteSettings } from "@/lib/db/schema";
 import { eq, and, desc, inArray } from "drizzle-orm";
 import { HeroSection } from "@/components/home/hero-section";
 import { CategorySection } from "@/components/home/category-section";
@@ -76,9 +76,14 @@ const sections = [
 ];
 
 export default async function HomePage() {
-  const categoryData = await Promise.all(
-    sections.map((s) => getTopResources(s.category))
-  );
+  const [categoryData, [settingsRow]] = await Promise.all([
+    Promise.all(sections.map((s) => getTopResources(s.category))),
+    db.select().from(siteSettings).limit(1),
+  ]);
+
+  const heroWords = settingsRow?.heroWords
+    ? settingsRow.heroWords.split(",").map((w) => w.trim()).filter(Boolean)
+    : undefined;
 
   // Only render sections that have at least 1 resource
   const activeSections = sections
@@ -87,7 +92,7 @@ export default async function HomePage() {
 
   return (
     <>
-      <HeroSection />
+      <HeroSection heroWords={heroWords} />
 
       {activeSections.map((section) => (
         <ContentBand key={section.category} variant={section.variant}>

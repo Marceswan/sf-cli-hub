@@ -2,13 +2,14 @@
 
 import { useEffect, useState, useCallback } from "react";
 
-const WORDS = [
+const DEFAULT_WORDS = [
   "Architect",
   "Admin",
   "Developer",
   "Superuser",
   "DevOps",
   "Consultant",
+  "Agentforce",
 ];
 
 const TYPE_SPEED = 90;
@@ -16,7 +17,12 @@ const DELETE_SPEED = 50;
 const PAUSE_AFTER_TYPE = 2000;
 const PAUSE_AFTER_DELETE = 400;
 
-export function TypingRotator() {
+interface TypingRotatorProps {
+  words?: string[];
+}
+
+export function TypingRotator({ words }: TypingRotatorProps) {
+  const WORDS = words && words.length > 0 ? words : DEFAULT_WORDS;
   const [wordIndex, setWordIndex] = useState(0);
   const [displayed, setDisplayed] = useState("");
   const [deleting, setDeleting] = useState(false);

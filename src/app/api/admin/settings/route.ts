@@ -3,6 +3,8 @@ import { db } from "@/lib/db";
 import { siteSettings } from "@/lib/db/schema";
 import { auth } from "@/lib/auth";
 
+const DEFAULT_HERO_WORDS = "Architect,Admin,Developer,Superuser,DevOps,Consultant,Agentforce";
+
 async function getSettings() {
   const [row] = await db.select().from(siteSettings).limit(1);
   if (row) return row;
@@ -10,10 +12,10 @@ async function getSettings() {
   // Seed default row on first access
   const [created] = await db
     .insert(siteSettings)
-    .values({ id: 1, requireApproval: true })
+    .values({ id: 1, requireApproval: true, heroWords: DEFAULT_HERO_WORDS })
     .onConflictDoNothing()
     .returning();
-  return created ?? { id: 1, requireApproval: true };
+  return created ?? { id: 1, requireApproval: true, heroWords: DEFAULT_HERO_WORDS };
 }
 
 export async function GET() {
@@ -45,6 +47,9 @@ export async function PATCH(req: Request) {
     const updateData: Record<string, unknown> = {};
     if (typeof body.requireApproval === "boolean") {
       updateData.requireApproval = body.requireApproval;
+    }
+    if (typeof body.heroWords === "string") {
+      updateData.heroWords = body.heroWords;
     }
 
     if (Object.keys(updateData).length === 0) {

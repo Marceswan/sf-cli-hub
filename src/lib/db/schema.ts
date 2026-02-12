@@ -184,6 +184,7 @@ export const resourceScreenshots = pgTable("resource_screenshots", {
 export const siteSettings = pgTable("site_settings", {
   id: integer("id").primaryKey().default(1),
   requireApproval: boolean("require_approval").default(true).notNull(),
+  heroWords: text("hero_words"),
 });
 
 /* ─── Type exports ─── */

@@ -7,7 +7,11 @@ import { TerminalAnimation } from "./terminal-animation";
 import { TypingRotator } from "./typing-rotator";
 import { useGsapEntrance } from "@/hooks/use-gsap";
 
-export function HeroSection() {
+interface HeroSectionProps {
+  heroWords?: string[];
+}
+
+export function HeroSection({ heroWords }: HeroSectionProps) {
   const contentRef = useGsapEntrance({
     y: 30,
     stagger: 0.12,
@@ -27,7 +31,7 @@ export function HeroSection() {
         {/* Heading */}
         <h1 data-animate className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-[1.1] mb-6">
           Supercharge your <br />
-          Salesforce <TypingRotator /> Workflow
+          Salesforce <TypingRotator words={heroWords} /> Workflow
         </h1>
 
         {/* Subtitle */}

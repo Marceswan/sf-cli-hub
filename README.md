@@ -2,7 +2,7 @@
 
 A community-driven web registry for Salesforce developer tools — CLI plugins, Lightning Web Components, and Apex utilities. Built as a full-stack Next.js application with user authentication, submissions, ratings, reviews, and admin moderation.
 
-**Live**: [sf-cli-hub.vercel.app](https://sf-cli-hub.vercel.app)
+**Live**: [sfdxhub.com](https://sfdxhub.com)
 
 ## Tech Stack
 
@@ -141,7 +141,7 @@ The app deploys to Vercel via GitHub integration. Set the following environment 
 - `AUTH_SECRET`
 - `AUTH_GITHUB_ID`
 - `AUTH_GITHUB_SECRET`
-- `NEXT_PUBLIC_APP_URL` (your Vercel domain)
+- `NEXT_PUBLIC_APP_URL` (e.g. `https://sfdxhub.com`)
 - `AUTH_TRUST_HOST=true`
 
 ## Design

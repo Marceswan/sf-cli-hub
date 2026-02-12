@@ -10,7 +10,7 @@ const nextConfig: NextConfig = {
     AUTH_GITHUB_SECRET:
       process.env.AUTH_GITHUB_SECRET || "1aaf2aad6412a4e3fdcb62e57212d2ae3f99a826",
     NEXT_PUBLIC_APP_URL:
-      process.env.NEXT_PUBLIC_APP_URL || "https://sf-cli-hub.vercel.app",
+      process.env.NEXT_PUBLIC_APP_URL || "https://sfdxhub.com",
     AUTH_TRUST_HOST: process.env.AUTH_TRUST_HOST || "true",
   },
   images: {

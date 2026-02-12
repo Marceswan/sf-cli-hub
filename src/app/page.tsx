@@ -1,5 +1,6 @@
 import { HeroSection } from "@/components/home/hero-section";
 import { CategorySection } from "@/components/home/category-section";
+import { ContentBand } from "@/components/layout/content-band";
 
 const cliPlugins = [
   {
@@ -114,26 +115,32 @@ export default function HomePage() {
     <>
       <HeroSection />
 
-      <CategorySection
-        title="CLI Power-Ups"
-        subtitle="Extend your terminal capabilities."
-        viewAllHref="/browse?category=cli-plugins"
-        resources={cliPlugins}
-      />
+      <ContentBand variant="filled">
+        <CategorySection
+          title="CLI Power-Ups"
+          subtitle="Extend your terminal capabilities."
+          viewAllHref="/browse?category=cli-plugins"
+          resources={cliPlugins}
+        />
+      </ContentBand>
 
-      <CategorySection
-        title="LWC Blueprint"
-        subtitle="Drop-in UI components for your org."
-        viewAllHref="/browse?category=lwc-library"
-        resources={lwcComponents}
-      />
+      <ContentBand variant="default">
+        <CategorySection
+          title="LWC Blueprint"
+          subtitle="Drop-in UI components for your org."
+          viewAllHref="/browse?category=lwc-library"
+          resources={lwcComponents}
+        />
+      </ContentBand>
 
-      <CategorySection
-        title="Apex Utilities"
-        subtitle="Battle-tested classes and frameworks."
-        viewAllHref="/browse?category=apex-utilities"
-        resources={apexUtils}
-      />
+      <ContentBand variant="filled">
+        <CategorySection
+          title="Apex Utilities"
+          subtitle="Battle-tested classes and frameworks."
+          viewAllHref="/browse?category=apex-utilities"
+          resources={apexUtils}
+        />
+      </ContentBand>
     </>
   );
 }

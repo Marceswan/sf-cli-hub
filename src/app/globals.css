@@ -24,6 +24,7 @@
   --color-accent: #6366f1;
   --color-accent-pink: #ec4899;
 
+  --color-bg-band: #f4f6f9;
   --color-glass: rgba(255, 255, 255, 0.7);
 
   /* Shadows */
@@ -49,6 +50,7 @@
   --color-text-muted: #94a3b8;
   --color-primary: #38bdf8;
   --color-primary-glow: rgba(56, 189, 248, 0.2);
+  --color-bg-band: #0b1120;
   --color-glass: rgba(15, 23, 42, 0.7);
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.5);
   --shadow-glow: 0 0 60px -15px rgba(99, 102, 241, 0.3);

@@ -1,11 +1,12 @@
 import Link from "next/link";
 import { requireAdmin } from "@/lib/auth-utils";
-import { LayoutDashboard, Inbox, Database } from "lucide-react";
+import { LayoutDashboard, Inbox, Database, Tag } from "lucide-react";
 
 const adminNav = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/submissions", label: "Submissions", icon: Inbox },
   { href: "/admin/resources", label: "Resources", icon: Database },
+  { href: "/admin/tags", label: "Tags", icon: Tag },
 ];
 
 export default async function AdminLayout({

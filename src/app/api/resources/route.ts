@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { resources, users } from "@/lib/db/schema";
-import { eq, and, ilike, desc, asc, sql, SQL } from "drizzle-orm";
+import { resources, users, resourceTags, tags } from "@/lib/db/schema";
+import { eq, and, ilike, desc, asc, sql, inArray, SQL } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { resourceSchema } from "@/lib/validators";
 import { slugify } from "@/lib/utils";
@@ -12,6 +12,7 @@ export async function GET(req: Request) {
     const url = new URL(req.url);
     const category = url.searchParams.get("category");
     const q = url.searchParams.get("q");
+    const tag = url.searchParams.get("tag");
     const sort = url.searchParams.get("sort") || "newest";
     const page = parseInt(url.searchParams.get("page") || "1");
     const limit = parseInt(url.searchParams.get("limit") || "12");
@@ -31,6 +32,15 @@ export async function GET(req: Request) {
     if (q) {
       conditions.push(
         ilike(resources.name, `%${q}%`)
+      );
+    }
+    if (tag) {
+      conditions.push(
+        sql`${resources.id} IN (
+          SELECT ${resourceTags.resourceId} FROM ${resourceTags}
+          INNER JOIN ${tags} ON ${tags.id} = ${resourceTags.tagId}
+          WHERE ${tags.slug} = ${tag}
+        )`
       );
     }
 
@@ -85,8 +95,35 @@ export async function GET(req: Request) {
         .where(where),
     ]);
 
+    // Batch-fetch tags for returned resources
+    const resourceIds = data.map((r) => r.id);
+    let tagsByResource: Record<string, { id: string; name: string; slug: string }[]> = {};
+    if (resourceIds.length > 0) {
+      const tagRows = await db
+        .select({
+          resourceId: resourceTags.resourceId,
+          tagId: tags.id,
+          tagName: tags.name,
+          tagSlug: tags.slug,
+        })
+        .from(resourceTags)
+        .innerJoin(tags, eq(resourceTags.tagId, tags.id))
+        .where(inArray(resourceTags.resourceId, resourceIds));
+
+      tagsByResource = tagRows.reduce((acc, row) => {
+        if (!acc[row.resourceId]) acc[row.resourceId] = [];
+        acc[row.resourceId].push({ id: row.tagId, name: row.tagName, slug: row.tagSlug });
+        return acc;
+      }, {} as typeof tagsByResource);
+    }
+
+    const resourcesWithTags = data.map((r) => ({
+      ...r,
+      tags: tagsByResource[r.id] || [],
+    }));
+
     return NextResponse.json({
-      resources: data,
+      resources: resourcesWithTags,
       pagination: {
         page,
         limit,
@@ -142,21 +179,30 @@ export async function POST(req: Request) {
       }
     }
 
+    const { tagIds, ...resourceData } = data;
+
     const [resource] = await db
       .insert(resources)
       .values({
-        ...data,
+        ...resourceData,
         slug,
         longDescription,
-        repositoryUrl: data.repositoryUrl || null,
-        npmUrl: data.npmUrl || null,
-        documentationUrl: data.documentationUrl || null,
-        iconEmoji: data.iconEmoji || "📦",
+        repositoryUrl: resourceData.repositoryUrl || null,
+        npmUrl: resourceData.npmUrl || null,
+        documentationUrl: resourceData.documentationUrl || null,
+        iconEmoji: resourceData.iconEmoji || "📦",
         authorId: session.user.id,
-        authorName: data.authorName || null,
+        authorName: resourceData.authorName || null,
         status: "pending",
       })
       .returning();
+
+    // Insert tag associations
+    if (tagIds && tagIds.length > 0) {
+      await db.insert(resourceTags).values(
+        tagIds.map((tagId) => ({ resourceId: resource.id, tagId }))
+      );
+    }
 
     return NextResponse.json(resource, { status: 201 });
   } catch {

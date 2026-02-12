@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { resources, users, reviews } from "@/lib/db/schema";
+import { resources, users, reviews, resourceTags, tags } from "@/lib/db/schema";
 import { eq, sql } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { fetchReadmeAsHtml, markdownToSafeHtml } from "@/lib/github";
@@ -47,22 +47,33 @@ export async function GET(
       );
     }
 
-    // Fetch reviews
-    const resourceReviews = await db
-      .select({
-        id: reviews.id,
-        rating: reviews.rating,
-        title: reviews.title,
-        body: reviews.body,
-        createdAt: reviews.createdAt,
-        userName: users.name,
-        userImage: users.image,
-      })
-      .from(reviews)
-      .leftJoin(users, eq(reviews.userId, users.id))
-      .where(eq(reviews.resourceId, id));
+    // Fetch reviews and tags in parallel
+    const [resourceReviews, resourceTagRows] = await Promise.all([
+      db
+        .select({
+          id: reviews.id,
+          rating: reviews.rating,
+          title: reviews.title,
+          body: reviews.body,
+          createdAt: reviews.createdAt,
+          userName: users.name,
+          userImage: users.image,
+        })
+        .from(reviews)
+        .leftJoin(users, eq(reviews.userId, users.id))
+        .where(eq(reviews.resourceId, id)),
+      db
+        .select({
+          id: tags.id,
+          name: tags.name,
+          slug: tags.slug,
+        })
+        .from(resourceTags)
+        .innerJoin(tags, eq(resourceTags.tagId, tags.id))
+        .where(eq(resourceTags.resourceId, id)),
+    ]);
 
-    return NextResponse.json({ ...resource, reviews: resourceReviews });
+    return NextResponse.json({ ...resource, reviews: resourceReviews, tags: resourceTagRows });
   } catch {
     return NextResponse.json(
       { error: "Failed to fetch resource" },
@@ -151,6 +162,16 @@ export async function PATCH(
       .set(updateData)
       .where(eq(resources.id, id))
       .returning();
+
+    // Update tags if provided
+    if (Array.isArray(body.tagIds)) {
+      await db.delete(resourceTags).where(eq(resourceTags.resourceId, id));
+      if (body.tagIds.length > 0) {
+        await db.insert(resourceTags).values(
+          body.tagIds.map((tagId: string) => ({ resourceId: id, tagId }))
+        );
+      }
+    }
 
     return NextResponse.json(updated);
   } catch {

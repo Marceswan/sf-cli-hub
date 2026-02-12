@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import { resources, resourceScreenshots } from "@/lib/db/schema";
+import { resources, resourceScreenshots, resourceTags, tags } from "@/lib/db/schema";
 import { eq, asc } from "drizzle-orm";
 import { notFound, redirect } from "next/navigation";
 import { requireAuth } from "@/lib/auth-utils";
@@ -47,15 +47,26 @@ export default async function EditResourcePage({ params }: PageProps) {
     redirect(`/resources/${slug}`);
   }
 
-  const screenshots = await db
-    .select({
-      id: resourceScreenshots.id,
-      url: resourceScreenshots.url,
-      displayOrder: resourceScreenshots.displayOrder,
-    })
-    .from(resourceScreenshots)
-    .where(eq(resourceScreenshots.resourceId, resource.id))
-    .orderBy(asc(resourceScreenshots.displayOrder));
+  const [screenshots, resourceTagRows] = await Promise.all([
+    db
+      .select({
+        id: resourceScreenshots.id,
+        url: resourceScreenshots.url,
+        displayOrder: resourceScreenshots.displayOrder,
+      })
+      .from(resourceScreenshots)
+      .where(eq(resourceScreenshots.resourceId, resource.id))
+      .orderBy(asc(resourceScreenshots.displayOrder)),
+    db
+      .select({
+        id: tags.id,
+        name: tags.name,
+        slug: tags.slug,
+      })
+      .from(resourceTags)
+      .innerJoin(tags, eq(resourceTags.tagId, tags.id))
+      .where(eq(resourceTags.resourceId, resource.id)),
+  ]);
 
   return (
     <div className="max-w-2xl mx-auto px-6 py-12">
@@ -71,7 +82,7 @@ export default async function EditResourcePage({ params }: PageProps) {
         automatically approved.
       </p>
 
-      <ResourceEditForm resource={resource} screenshots={screenshots} />
+      <ResourceEditForm resource={resource} screenshots={screenshots} tags={resourceTagRows} />
     </div>
   );
 }

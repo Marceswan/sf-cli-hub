@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import { resources, users, reviews, resourceScreenshots } from "@/lib/db/schema";
+import { resources, users, reviews, resourceScreenshots, resourceTags, tags } from "@/lib/db/schema";
 import { eq, asc, sql } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
@@ -69,16 +69,27 @@ export default async function ResourceDetailPage({ params }: PageProps) {
     .leftJoin(users, eq(reviews.userId, users.id))
     .where(eq(reviews.resourceId, resource.id));
 
-  const screenshots = await db
-    .select({
-      id: resourceScreenshots.id,
-      url: resourceScreenshots.url,
-      alt: resourceScreenshots.alt,
-      displayOrder: resourceScreenshots.displayOrder,
-    })
-    .from(resourceScreenshots)
-    .where(eq(resourceScreenshots.resourceId, resource.id))
-    .orderBy(asc(resourceScreenshots.displayOrder));
+  const [screenshots, resourceTagRows] = await Promise.all([
+    db
+      .select({
+        id: resourceScreenshots.id,
+        url: resourceScreenshots.url,
+        alt: resourceScreenshots.alt,
+        displayOrder: resourceScreenshots.displayOrder,
+      })
+      .from(resourceScreenshots)
+      .where(eq(resourceScreenshots.resourceId, resource.id))
+      .orderBy(asc(resourceScreenshots.displayOrder)),
+    db
+      .select({
+        id: tags.id,
+        name: tags.name,
+        slug: tags.slug,
+      })
+      .from(resourceTags)
+      .innerJoin(tags, eq(resourceTags.tagId, tags.id))
+      .where(eq(resourceTags.resourceId, resource.id)),
+  ]);
 
   const currentUser = await getCurrentUser();
 
@@ -133,8 +144,11 @@ export default async function ResourceDetailPage({ params }: PageProps) {
             </div>
             <div>
               <h1 className="text-3xl font-bold">{resource.name}</h1>
-              <div className="flex items-center gap-3 mt-2">
+              <div className="flex items-center gap-3 mt-2 flex-wrap">
                 <Badge>{categoryLabels[resource.category]}</Badge>
+                {resourceTagRows.map((t) => (
+                  <Badge key={t.id} variant="primary">{t.name}</Badge>
+                ))}
                 {resource.version && (
                   <Badge variant="primary">v{resource.version}</Badge>
                 )}
@@ -213,6 +227,18 @@ export default async function ResourceDetailPage({ params }: PageProps) {
                 <dt className="text-text-muted">Published</dt>
                 <dd>{formatDate(resource.createdAt)}</dd>
               </div>
+              {resourceTagRows.length > 0 && (
+                <div>
+                  <dt className="text-text-muted mb-1.5">Tags</dt>
+                  <dd className="flex flex-wrap gap-1.5">
+                    {resourceTagRows.map((t) => (
+                      <Badge key={t.id} variant="primary" className="text-[10px] px-2">
+                        {t.name}
+                      </Badge>
+                    ))}
+                  </dd>
+                </div>
+              )}
             </dl>
           </div>
 

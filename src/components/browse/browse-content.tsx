@@ -4,11 +4,18 @@ import { useEffect, useState, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { SearchBar } from "@/components/browse/search-bar";
 import { CategoryTabs } from "@/components/browse/category-tabs";
+import { TagFilter } from "@/components/browse/tag-filter";
 import { SortDropdown } from "@/components/browse/sort-dropdown";
 import { ResourceCard } from "@/components/resource/resource-card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useDebounce } from "@/hooks/use-debounce";
+
+interface TagInfo {
+  id: string;
+  name: string;
+  slug: string;
+}
 
 interface ResourceItem {
   id: string;
@@ -21,6 +28,7 @@ interface ResourceItem {
   version: string | null;
   avgRating: string | null;
   reviewsCount: number;
+  tags?: TagInfo[];
 }
 
 interface PaginationInfo {
@@ -37,6 +45,7 @@ export function BrowseContent() {
   const [category, setCategory] = useState(
     searchParams.get("category") || ""
   );
+  const [tag, setTag] = useState(searchParams.get("tag") || "");
   const [search, setSearch] = useState(searchParams.get("q") || "");
   const [sort, setSort] = useState(searchParams.get("sort") || "newest");
   const [page, setPage] = useState(
@@ -52,6 +61,7 @@ export function BrowseContent() {
     setLoading(true);
     const params = new URLSearchParams();
     if (category) params.set("category", category);
+    if (tag) params.set("tag", tag);
     if (debouncedSearch) params.set("q", debouncedSearch);
     params.set("sort", sort);
     params.set("page", String(page));
@@ -66,7 +76,7 @@ export function BrowseContent() {
     } finally {
       setLoading(false);
     }
-  }, [category, debouncedSearch, sort, page]);
+  }, [category, tag, debouncedSearch, sort, page]);
 
   useEffect(() => {
     fetchResources();
@@ -75,21 +85,23 @@ export function BrowseContent() {
   useEffect(() => {
     const params = new URLSearchParams();
     if (category) params.set("category", category);
+    if (tag) params.set("tag", tag);
     if (debouncedSearch) params.set("q", debouncedSearch);
     if (sort !== "newest") params.set("sort", sort);
     if (page > 1) params.set("page", String(page));
     router.replace(`/browse?${params}`, { scroll: false });
-  }, [category, debouncedSearch, sort, page, router]);
+  }, [category, tag, debouncedSearch, sort, page, router]);
 
   useEffect(() => {
     setPage(1);
-  }, [category, debouncedSearch, sort]);
+  }, [category, tag, debouncedSearch, sort]);
 
   return (
     <>
       {/* Filters */}
       <div className="space-y-4 mb-8">
         <CategoryTabs value={category} onChange={setCategory} />
+        <TagFilter value={tag} onChange={setTag} />
         <div className="flex gap-4 flex-col sm:flex-row">
           <SearchBar value={search} onChange={setSearch} className="flex-1" />
           <SortDropdown value={sort} onChange={setSort} />
@@ -125,6 +137,7 @@ export function BrowseContent() {
                 avgRating={resource.avgRating ? parseFloat(resource.avgRating) : 0}
                 reviewsCount={resource.reviewsCount}
                 category={resource.category}
+                tags={resource.tags}
               />
             ))}
           </div>

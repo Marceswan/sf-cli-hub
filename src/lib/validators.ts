@@ -26,6 +26,11 @@ export const resourceSchema = z.object({
   iconEmoji: z.string().max(10).optional(),
   version: z.string().max(50).optional(),
   authorName: z.string().max(255).optional(),
+  tagIds: z.array(z.string().uuid()).max(10).optional().default([]),
+});
+
+export const tagSchema = z.object({
+  name: z.string().min(1, "Tag name is required").max(100),
 });
 
 export const reviewSchema = z.object({
@@ -38,4 +43,5 @@ export const reviewSchema = z.object({
 export type LoginInput = z.infer<typeof loginSchema>;
 export type RegisterInput = z.infer<typeof registerSchema>;
 export type ResourceInput = z.infer<typeof resourceSchema>;
+export type TagInput = z.infer<typeof tagSchema>;
 export type ReviewInput = z.infer<typeof reviewSchema>;

@@ -20,8 +20,8 @@ export function HeroSection() {
       <div ref={contentRef} className="relative z-10 max-w-[1200px] mx-auto px-6">
         {/* Badges */}
         <div data-animate className="flex justify-center gap-3 mb-6">
-          <Badge>v2.4.0 Released</Badge>
-          <Badge>Open Source</Badge>
+          <Badge>v0.0.1 Released</Badge>
+          <Badge>Open Source Powered</Badge>
         </div>
 
         {/* Heading */}

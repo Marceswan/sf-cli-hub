@@ -4,7 +4,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export default function BrowsePage() {
   return (
-    <div className="grid grid-cols-[1fr_minmax(0,1200px)_1fr]">
+    <div className="flex-1 grid grid-cols-[1fr_minmax(0,1200px)_1fr]">
       <div className="max-sm:hidden grid-square-pattern" />
       <div className="col-start-2 px-6 py-12">
         <h1 className="text-3xl font-bold mb-2">Browse Tools</h1>

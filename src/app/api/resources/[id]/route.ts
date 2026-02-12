@@ -121,11 +121,10 @@ export async function PATCH(
     if (isAdmin && body.status) updateData.status = body.status;
     if (isAdmin && body.featured !== undefined) updateData.featured = body.featured;
 
-    // Owner/admin editable fields
+    // Owner/admin editable fields (longDescription handled separately below)
     const editableFields = [
       "name",
       "description",
-      "longDescription",
       "installCommand",
       "repositoryUrl",
       "npmUrl",

@@ -5,7 +5,7 @@ import { eq, and, ilike, desc, asc, sql, inArray, SQL } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { resourceSchema } from "@/lib/validators";
 import { slugify } from "@/lib/utils";
-import { fetchReadmeAsHtml } from "@/lib/github";
+import { fetchReadmeAsHtml, markdownToSafeHtml } from "@/lib/github";
 
 export async function GET(req: Request) {
   try {
@@ -26,7 +26,7 @@ export async function GET(req: Request) {
     }
     if (category) {
       conditions.push(
-        eq(resources.category, category as "cli-plugins" | "lwc-library" | "apex-utilities")
+        eq(resources.category, category as "cli-plugins" | "lwc-library" | "apex-utilities" | "agentforce" | "flow" | "experience-cloud")
       );
     }
     if (q) {
@@ -171,11 +171,18 @@ export async function POST(req: Request) {
     }
 
     // Auto-fetch README from GitHub and use as longDescription
-    let longDescription = data.longDescription || null;
+    let longDescription: string | null = null;
     if (data.repositoryUrl) {
       const readmeHtml = await fetchReadmeAsHtml(data.repositoryUrl);
       if (readmeHtml) {
         longDescription = readmeHtml;
+      }
+    }
+    // Fallback: convert manual markdown/HTML input
+    if (!longDescription && data.longDescription) {
+      const safeHtml = await markdownToSafeHtml(data.longDescription);
+      if (safeHtml) {
+        longDescription = safeHtml;
       }
     }
 

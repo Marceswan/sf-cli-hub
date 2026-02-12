@@ -1,6 +1,13 @@
 import Link from "next/link";
 import { Card, CardIcon, CardMeta } from "@/components/ui/card";
 import { StarRating } from "@/components/ui/star-rating";
+import { Badge } from "@/components/ui/badge";
+
+interface TagInfo {
+  id: string;
+  name: string;
+  slug: string;
+}
 
 interface ResourceCardProps {
   slug: string;
@@ -12,6 +19,7 @@ interface ResourceCardProps {
   avgRating?: number;
   reviewsCount?: number;
   category?: string;
+  tags?: TagInfo[];
 }
 
 export function ResourceCard({
@@ -24,8 +32,11 @@ export function ResourceCard({
   avgRating = 0,
   reviewsCount = 0,
   category,
+  tags = [],
 }: ResourceCardProps) {
   const isLwc = category === "lwc-library";
+  const visibleTags = tags.slice(0, 3);
+  const extraCount = tags.length - 3;
 
   return (
     <Link href={`/resources/${slug}`}>
@@ -39,9 +50,21 @@ export function ResourceCard({
             <CardIcon>{iconEmoji}</CardIcon>
           )}
           <h3 className="text-lg font-semibold mb-2">{name}</h3>
-          <p className="text-text-muted text-[0.95rem] mb-6 flex-grow">
+          <p className="text-text-muted text-[0.95rem] mb-3 flex-grow">
             {description}
           </p>
+          {visibleTags.length > 0 && (
+            <div className="flex flex-wrap gap-1.5 mb-4">
+              {visibleTags.map((t) => (
+                <Badge key={t.id} variant="primary" className="text-[10px] px-2 py-0">
+                  {t.name}
+                </Badge>
+              ))}
+              {extraCount > 0 && (
+                <Badge className="text-[10px] px-2 py-0">+{extraCount}</Badge>
+              )}
+            </div>
+          )}
         </div>
         <CardMeta>
           <span className="truncate max-w-[60%]">

@@ -1,8 +1,8 @@
 export const dynamic = "force-dynamic";
 
 import { db } from "@/lib/db";
-import { resources, users } from "@/lib/db/schema";
-import { eq, sql } from "drizzle-orm";
+import { resources, users, resourceTags, tags } from "@/lib/db/schema";
+import { eq, sql, inArray } from "drizzle-orm";
 import { Badge } from "@/components/ui/badge";
 import { formatDate } from "@/lib/utils";
 import { ResourceActions } from "@/components/admin/resource-actions";
@@ -24,6 +24,27 @@ export default async function AdminResourcesPage() {
     .from(resources)
     .leftJoin(users, eq(resources.authorId, users.id))
     .orderBy(sql`${resources.createdAt} desc`);
+
+  // Batch-fetch tags for all resources
+  const resourceIds = allResources.map((r) => r.id);
+  let tagsByResource: Record<string, { id: string; name: string }[]> = {};
+  if (resourceIds.length > 0) {
+    const tagRows = await db
+      .select({
+        resourceId: resourceTags.resourceId,
+        tagId: tags.id,
+        tagName: tags.name,
+      })
+      .from(resourceTags)
+      .innerJoin(tags, eq(resourceTags.tagId, tags.id))
+      .where(inArray(resourceTags.resourceId, resourceIds));
+
+    tagsByResource = tagRows.reduce((acc, row) => {
+      if (!acc[row.resourceId]) acc[row.resourceId] = [];
+      acc[row.resourceId].push({ id: row.tagId, name: row.tagName });
+      return acc;
+    }, {} as typeof tagsByResource);
+  }
 
   const statusVariant: Record<string, "success" | "warning" | "danger"> = {
     approved: "success",
@@ -55,6 +76,9 @@ export default async function AdminResourcesPage() {
                   Category
                 </th>
                 <th className="text-left px-4 py-3 font-medium text-text-muted">
+                  Tags
+                </th>
+                <th className="text-left px-4 py-3 font-medium text-text-muted">
                   Status
                 </th>
                 <th className="text-left px-4 py-3 font-medium text-text-muted">
@@ -82,6 +106,15 @@ export default async function AdminResourcesPage() {
                   </td>
                   <td className="px-4 py-3">
                     <Badge>{categoryLabels[resource.category]}</Badge>
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="flex flex-wrap gap-1">
+                      {(tagsByResource[resource.id] || []).map((t) => (
+                        <Badge key={t.id} variant="primary" className="text-[10px] px-1.5 py-0">
+                          {t.name}
+                        </Badge>
+                      ))}
+                    </div>
                   </td>
                   <td className="px-4 py-3">
                     <Badge variant={statusVariant[resource.status]}>

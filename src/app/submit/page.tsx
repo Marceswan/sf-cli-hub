@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { EmojiPicker } from "@/components/ui/emoji-picker";
+import { TagPicker } from "@/components/ui/tag-picker";
 import { Send, CheckCircle, ImagePlus, X } from "lucide-react";
 import Image from "next/image";
 
@@ -21,6 +22,7 @@ export default function SubmitPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [screenshotFiles, setScreenshotFiles] = useState<File[]>([]);
   const [screenshotPreviews, setScreenshotPreviews] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -57,6 +59,7 @@ export default function SubmitPage() {
       iconEmoji: formData.get("iconEmoji") as string,
       version: formData.get("version") as string,
       authorName: (formData.get("authorName") as string) || undefined,
+      tagIds: selectedTags,
     };
 
     try {
@@ -151,6 +154,8 @@ export default function SubmitPage() {
             ))}
           </select>
         </div>
+
+        <TagPicker value={selectedTags} onChange={setSelectedTags} />
 
         <div className="space-y-1.5">
           <label htmlFor="description" className="block text-sm font-medium">

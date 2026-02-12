@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { EmojiPicker } from "@/components/ui/emoji-picker";
+import { TagPicker } from "@/components/ui/tag-picker";
 import { Save, ImagePlus, X, Trash2 } from "lucide-react";
 import Image from "next/image";
 
@@ -20,6 +21,12 @@ interface Screenshot {
   id: string;
   url: string;
   displayOrder: number;
+}
+
+interface ResourceTag {
+  id: string;
+  name: string;
+  slug: string;
 }
 
 interface ResourceEditFormProps {
@@ -39,12 +46,14 @@ interface ResourceEditFormProps {
     authorName: string | null;
   };
   screenshots: Screenshot[];
+  tags?: ResourceTag[];
 }
 
-export function ResourceEditForm({ resource, screenshots }: ResourceEditFormProps) {
+export function ResourceEditForm({ resource, screenshots, tags: initialTags = [] }: ResourceEditFormProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [selectedTags, setSelectedTags] = useState<string[]>(initialTags.map((t) => t.id));
   const [existingScreenshots, setExistingScreenshots] = useState<Screenshot[]>(screenshots);
   const [newFiles, setNewFiles] = useState<File[]>([]);
   const [newPreviews, setNewPreviews] = useState<string[]>([]);
@@ -102,6 +111,7 @@ export function ResourceEditForm({ resource, screenshots }: ResourceEditFormProp
       iconEmoji: formData.get("iconEmoji") as string,
       version: formData.get("version") as string,
       authorName: (formData.get("authorName") as string) || undefined,
+      tagIds: selectedTags,
     };
 
     try {
@@ -179,6 +189,8 @@ export function ResourceEditForm({ resource, screenshots }: ResourceEditFormProp
           ))}
         </select>
       </div>
+
+      <TagPicker value={selectedTags} onChange={setSelectedTags} />
 
       <div className="space-y-1.5">
         <label htmlFor="description" className="block text-sm font-medium">

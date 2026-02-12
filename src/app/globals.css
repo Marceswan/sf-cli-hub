@@ -82,6 +82,15 @@ body {
   );
 }
 
+.grid-square-pattern {
+  border-inline: 1px solid var(--color-grid-line);
+  background-size: 10px 10px;
+  background-attachment: fixed;
+  background-image:
+    linear-gradient(to right, var(--color-grid-line) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--color-grid-line) 1px, transparent 1px);
+}
+
 /* Gradient text utility */
 .gradient-text {
   background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 50%, var(--color-accent-pink) 100%);

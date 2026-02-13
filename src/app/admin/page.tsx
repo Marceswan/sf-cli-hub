@@ -8,6 +8,7 @@ import { StatsCard } from "@/components/admin/stats-cards";
 import { Badge } from "@/components/ui/badge";
 import { formatDate } from "@/lib/utils";
 import Link from "next/link";
+import { PulseDashboard } from "@/components/admin/pulse/pulse-dashboard";
 
 export default async function AdminDashboard() {
   const [[totalUsers], [totalResources], [pending], [totalReviews]] =
@@ -68,7 +69,7 @@ export default async function AdminDashboard() {
         />
       </div>
 
-      <div className="bg-bg-card border border-border rounded-card p-6">
+      <div className="bg-bg-card border border-border rounded-card p-6 mb-8">
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-semibold">Recent Submissions</h3>
           <Link
@@ -100,6 +101,8 @@ export default async function AdminDashboard() {
           )}
         </div>
       </div>
+
+      <PulseDashboard />
     </div>
   );
 }

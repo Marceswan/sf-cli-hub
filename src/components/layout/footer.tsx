@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Rss } from "lucide-react";
+import { Heart, Rss } from "lucide-react";
 
 export function Footer() {
   return (
@@ -70,6 +70,16 @@ export function Footer() {
                 <Link href="/browse" className="hover:text-primary transition-colors">
                   Browse All
                 </Link>
+              </li>
+              <li>
+                <a href="https://github.com/Marceswan/sf-cli-hub" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">
+                  GitHub
+                </a>
+              </li>
+              <li>
+                <a href="https://github.com/sponsors/Marceswan" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors inline-flex items-center gap-1.5">
+                  <Heart size={14} /> Sponsor
+                </a>
               </li>
             </ul>
           </div>

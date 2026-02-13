@@ -10,6 +10,7 @@ import {
   uniqueIndex,
   primaryKey,
   pgEnum,
+  index,
 } from "drizzle-orm/pg-core";
 import type { AdapterAccountType } from "next-auth/adapters";
 
@@ -187,6 +188,30 @@ export const siteSettings = pgTable("site_settings", {
   heroWords: text("hero_words"),
 });
 
+/* ─── Page Views (Analytics) ─── */
+export const pageViews = pgTable(
+  "page_views",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    path: varchar("path", { length: 512 }).notNull(),
+    referrer: varchar("referrer", { length: 1024 }),
+    visitorId: varchar("visitor_id", { length: 36 }).notNull(),
+    userId: uuid("user_id").references(() => users.id, { onDelete: "set null" }),
+    category: resourceCategoryEnum("category"),
+    resourceId: uuid("resource_id").references(() => resources.id, {
+      onDelete: "set null",
+    }),
+    durationSeconds: integer("duration_seconds").default(0),
+    viewedAt: timestamp("viewed_at", { mode: "date" }).defaultNow().notNull(),
+  },
+  (table) => [
+    index("page_views_viewed_at_idx").on(table.viewedAt),
+    index("page_views_path_idx").on(table.path),
+    index("page_views_category_idx").on(table.category),
+    index("page_views_user_id_idx").on(table.userId),
+  ]
+);
+
 /* ─── Type exports ─── */
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
@@ -197,3 +222,5 @@ export type NewReview = typeof reviews.$inferInsert;
 export type Tag = typeof tags.$inferSelect;
 export type ResourceScreenshot = typeof resourceScreenshots.$inferSelect;
 export type NewResourceScreenshot = typeof resourceScreenshots.$inferInsert;
+export type PageView = typeof pageViews.$inferSelect;
+export type NewPageView = typeof pageViews.$inferInsert;

@@ -4,6 +4,7 @@ import { ThemeProvider } from "@/components/providers/theme-provider";
 import { SessionProvider } from "@/components/providers/session-provider";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
+import { PageViewTracker } from "@/components/analytics/page-view-tracker";
 import "./globals.css";
 
 const inter = Inter({
@@ -32,6 +33,7 @@ export default function RootLayout({
       <body className={`${inter.variable} ${jetbrainsMono.variable} antialiased flex flex-col min-h-svh`}>
         <SessionProvider>
           <ThemeProvider>
+            <PageViewTracker />
             <Header />
             <main className="flex-1 flex flex-col pt-[70px]">{children}</main>
             <Footer />

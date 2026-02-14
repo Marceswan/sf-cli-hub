@@ -55,7 +55,10 @@ export function Header() {
           {user ? (
             <div className="relative">
               <button
-                onClick={() => setUserMenuOpen(!userMenuOpen)}
+                onClick={() => {
+                  setUserMenuOpen(!userMenuOpen);
+                  setMobileOpen(false);
+                }}
                 className="w-8 h-8 rounded-full bg-bg-surface border border-border flex items-center justify-center text-xs font-bold cursor-pointer hover:border-primary transition-colors"
               >
                 {user.name?.[0]?.toUpperCase() || "U"}
@@ -125,7 +128,10 @@ export function Header() {
           {/* Mobile menu button */}
           <button
             className="md:hidden text-text-muted hover:text-text-main cursor-pointer"
-            onClick={() => setMobileOpen(!mobileOpen)}
+            onClick={() => {
+              setMobileOpen(!mobileOpen);
+              setUserMenuOpen(false);
+            }}
             aria-label="Toggle menu"
           >
             {mobileOpen ? <X size={24} /> : <Menu size={24} />}
@@ -136,16 +142,19 @@ export function Header() {
       {/* Mobile nav */}
       <div
         className={cn(
-          "md:hidden overflow-hidden transition-all duration-300 border-t border-border",
-          mobileOpen ? "max-h-80" : "max-h-0 border-t-0"
+          "md:hidden overflow-hidden border-t border-border",
+          "transition-[max-height,border-color] duration-300 ease-in-out",
+          mobileOpen
+            ? "max-h-[500px]"
+            : "max-h-0 border-t-0 pointer-events-none"
         )}
       >
-        <nav className="flex flex-col gap-1 px-6 py-4">
+        <nav className="flex flex-col px-6 py-3">
           {navLinks.map((link) => (
             <Link
               key={link.href}
               href={link.href}
-              className="py-2 text-sm font-medium text-text-muted hover:text-primary transition-colors"
+              className="flex items-center min-h-[44px] py-3 text-sm font-medium text-text-muted active:text-primary hover:text-primary transition-colors touch-manipulation"
               onClick={() => setMobileOpen(false)}
             >
               {link.label}
@@ -154,7 +163,7 @@ export function Header() {
           {!user && (
             <Link
               href="/login"
-              className="py-2 text-sm font-medium text-text-muted hover:text-text-main transition-colors"
+              className="flex items-center min-h-[44px] py-3 text-sm font-medium text-text-muted active:text-text-main hover:text-text-main transition-colors touch-manipulation"
               onClick={() => setMobileOpen(false)}
             >
               Sign In

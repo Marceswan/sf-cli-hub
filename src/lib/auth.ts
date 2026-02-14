@@ -20,11 +20,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   },
   providers: [
     GitHub({
+      allowDangerousEmailAccountLinking: true,
       profile(profile) {
         return {
           id: String(profile.id),
           name: profile.name ?? profile.login,
-          email: "marc.e.swan@gmail.com",
+          email: profile.email,
           image: profile.avatar_url,
         };
       },

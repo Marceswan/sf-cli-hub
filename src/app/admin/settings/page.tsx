@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Settings, Type, X, Plus } from "lucide-react";
+import { Settings, Type, X, Plus, Mail } from "lucide-react";
 
 const DEFAULT_HERO_WORDS = "Architect,Admin,Developer,Superuser,DevOps,Consultant,Agentforce";
 
@@ -14,6 +14,15 @@ export default function AdminSettingsPage() {
   const [savingWords, setSavingWords] = useState(false);
   const [wordsSaved, setWordsSaved] = useState(false);
 
+  const [emailToggles, setEmailToggles] = useState({
+    emailWelcome: true,
+    emailSubmissionReceived: true,
+    emailSubmissionApproved: true,
+    emailSubmissionRejected: true,
+    emailAdminAlert: true,
+  });
+  const [savingEmail, setSavingEmail] = useState<string | null>(null);
+
   useEffect(() => {
     fetch("/api/admin/settings")
       .then((res) => res.json())
@@ -24,6 +33,13 @@ export default function AdminSettingsPage() {
           .map((w: string) => w.trim())
           .filter(Boolean);
         setHeroWords(words);
+        setEmailToggles({
+          emailWelcome: data.emailWelcome ?? true,
+          emailSubmissionReceived: data.emailSubmissionReceived ?? true,
+          emailSubmissionApproved: data.emailSubmissionApproved ?? true,
+          emailSubmissionRejected: data.emailSubmissionRejected ?? true,
+          emailAdminAlert: data.emailAdminAlert ?? true,
+        });
       })
       .finally(() => setLoading(false));
   }, []);
@@ -54,6 +70,23 @@ export default function AdminSettingsPage() {
 
   function removeWord(index: number) {
     setHeroWords(heroWords.filter((_, i) => i !== index));
+  }
+
+  async function toggleEmail(key: keyof typeof emailToggles) {
+    setSavingEmail(key);
+    const newValue = !emailToggles[key];
+    try {
+      const res = await fetch("/api/admin/settings", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ [key]: newValue }),
+      });
+      if (res.ok) {
+        setEmailToggles((prev) => ({ ...prev, [key]: newValue }));
+      }
+    } finally {
+      setSavingEmail(null);
+    }
   }
 
   async function saveWords() {
@@ -179,6 +212,51 @@ export default function AdminSettingsPage() {
               <span className="text-sm text-green-500">Saved!</span>
             )}
           </div>
+        </div>
+      </div>
+
+      {/* Email Notifications */}
+      <div className="bg-bg-card border border-border rounded-card p-6 mt-6">
+        <div className="flex items-start gap-3 mb-1">
+          <Mail size={20} className="text-text-muted mt-0.5 shrink-0" />
+          <div>
+            <p className="font-medium">Email Notifications</p>
+            <p className="text-sm text-text-muted">
+              Control which transactional emails are sent.
+            </p>
+          </div>
+        </div>
+
+        <div className="mt-4 space-y-4">
+          {([
+            { key: "emailWelcome" as const, label: "Welcome Email", desc: "Send a welcome email when a new user registers." },
+            { key: "emailSubmissionReceived" as const, label: "Submission Received", desc: "Notify the submitter that their resource is pending review." },
+            { key: "emailSubmissionApproved" as const, label: "Submission Approved", desc: "Notify the submitter when their resource is approved." },
+            { key: "emailSubmissionRejected" as const, label: "Submission Rejected", desc: "Notify the submitter when their resource is not approved." },
+            { key: "emailAdminAlert" as const, label: "Admin New Submission Alert", desc: "Email all admins when a new resource is submitted for review." },
+          ]).map(({ key, label, desc }) => (
+            <div key={key} className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium">{label}</p>
+                <p className="text-xs text-text-muted">{desc}</p>
+              </div>
+              <button
+                onClick={() => toggleEmail(key)}
+                disabled={savingEmail === key}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer shrink-0 ml-4 ${
+                  emailToggles[key] ? "bg-primary" : "bg-border"
+                } ${savingEmail === key ? "opacity-50" : ""}`}
+                role="switch"
+                aria-checked={emailToggles[key]}
+              >
+                <span
+                  className={`inline-block h-4 w-4 rounded-full bg-white transition-transform ${
+                    emailToggles[key] ? "translate-x-6" : "translate-x-1"
+                  }`}
+                />
+              </button>
+            </div>
+          ))}
         </div>
       </div>
     </div>

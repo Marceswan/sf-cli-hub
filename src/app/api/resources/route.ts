@@ -7,7 +7,7 @@ import { resourceSchema } from "@/lib/validators";
 import { slugify } from "@/lib/utils";
 import { fetchReadmeAsHtml, markdownToSafeHtml } from "@/lib/github";
 import { getRequireApproval } from "@/lib/settings";
-import { sendSubmissionReceivedEmail } from "@/lib/email";
+import { sendSubmissionReceivedEmail, sendAdminSubmissionAlert } from "@/lib/email";
 
 export async function GET(req: Request) {
   try {
@@ -228,6 +228,12 @@ export async function POST(req: Request) {
         );
       }
     }
+
+    // Notify admins of new submission (fire-and-forget)
+    void sendAdminSubmissionAlert(
+      resource.name,
+      data.authorName || session.user.name || "Unknown"
+    );
 
     return NextResponse.json(resource, { status: 201 });
   } catch {

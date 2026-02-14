@@ -186,6 +186,11 @@ export const siteSettings = pgTable("site_settings", {
   id: integer("id").primaryKey().default(1),
   requireApproval: boolean("require_approval").default(true).notNull(),
   heroWords: text("hero_words"),
+  emailWelcome: boolean("email_welcome").default(true).notNull(),
+  emailSubmissionReceived: boolean("email_submission_received").default(true).notNull(),
+  emailSubmissionApproved: boolean("email_submission_approved").default(true).notNull(),
+  emailSubmissionRejected: boolean("email_submission_rejected").default(true).notNull(),
+  emailAdminAlert: boolean("email_admin_alert").default(true).notNull(),
 });
 
 /* ─── Page Views (Analytics) ─── */

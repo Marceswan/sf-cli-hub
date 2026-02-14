@@ -1,4 +1,8 @@
 import { Resend } from "resend";
+import { db } from "@/lib/db";
+import { users } from "@/lib/db/schema";
+import { eq } from "drizzle-orm";
+import { getEmailSettings } from "@/lib/settings";
 
 let _resend: Resend | null = null;
 
@@ -139,10 +143,27 @@ function submissionRejectedContent(userName: string, resourceName: string) {
   };
 }
 
+function adminSubmissionAlertContent(resourceName: string, authorName: string) {
+  return {
+    subject: `New submission from ${authorName}: ${resourceName}`,
+    html: wrapInLayout(`
+      <h1 style="margin:0 0 16px;font-size:24px;color:#0f172a;">New Submission for Review</h1>
+      <p style="margin:0 0 16px;font-size:16px;color:#3f3f46;line-height:1.6;">
+        <strong>${authorName}</strong> just submitted <strong>${resourceName}</strong> for review.
+      </p>
+      <a href="${BASE_URL}/admin/submissions" style="display:inline-block;padding:12px 24px;background-color:#3b82f6;color:#ffffff;text-decoration:none;border-radius:6px;font-weight:600;font-size:14px;">
+        Review Submissions
+      </a>
+    `),
+  };
+}
+
 // ─── Send Functions (fire-and-forget) ───
 
 export async function sendWelcomeEmail(email: string, userName: string) {
   try {
+    const settings = await getEmailSettings();
+    if (!settings.emailWelcome) return;
     const { subject, html } = welcomeEmailContent(userName);
     await getResend()?.emails.send({ from: FROM, to: email, subject, html });
     console.log(`[email] Welcome email sent to ${email}`);
@@ -157,6 +178,8 @@ export async function sendSubmissionReceivedEmail(
   resourceName: string
 ) {
   try {
+    const settings = await getEmailSettings();
+    if (!settings.emailSubmissionReceived) return;
     const { subject, html } = submissionReceivedContent(userName, resourceName);
     await getResend()?.emails.send({ from: FROM, to: email, subject, html });
     console.log(`[email] Submission received email sent to ${email}`);
@@ -175,6 +198,8 @@ export async function sendSubmissionApprovedEmail(
   resourceSlug: string
 ) {
   try {
+    const settings = await getEmailSettings();
+    if (!settings.emailSubmissionApproved) return;
     const { subject, html } = submissionApprovedContent(
       userName,
       resourceName,
@@ -196,6 +221,8 @@ export async function sendSubmissionRejectedEmail(
   resourceName: string
 ) {
   try {
+    const settings = await getEmailSettings();
+    if (!settings.emailSubmissionRejected) return;
     const { subject, html } = submissionRejectedContent(
       userName,
       resourceName
@@ -207,5 +234,35 @@ export async function sendSubmissionRejectedEmail(
       `[email] Failed to send submission rejected email to ${email}:`,
       error
     );
+  }
+}
+
+export async function sendAdminSubmissionAlert(
+  resourceName: string,
+  authorName: string
+) {
+  try {
+    const settings = await getEmailSettings();
+    if (!settings.emailAdminAlert) return;
+
+    const admins = await db
+      .select({ email: users.email })
+      .from(users)
+      .where(eq(users.role, "admin"));
+
+    if (admins.length === 0) return;
+
+    const { subject, html } = adminSubmissionAlertContent(resourceName, authorName);
+    const resend = getResend();
+    if (!resend) return;
+
+    await Promise.allSettled(
+      admins.map((admin) =>
+        resend.emails.send({ from: FROM, to: admin.email, subject, html })
+      )
+    );
+    console.log(`[email] Admin submission alert sent to ${admins.length} admin(s)`);
+  } catch (error) {
+    console.error(`[email] Failed to send admin submission alert:`, error);
   }
 }

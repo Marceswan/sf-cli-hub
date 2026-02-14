@@ -12,10 +12,28 @@ async function getSettings() {
   // Seed default row on first access
   const [created] = await db
     .insert(siteSettings)
-    .values({ id: 1, requireApproval: true, heroWords: DEFAULT_HERO_WORDS })
+    .values({
+      id: 1,
+      requireApproval: true,
+      heroWords: DEFAULT_HERO_WORDS,
+      emailWelcome: true,
+      emailSubmissionReceived: true,
+      emailSubmissionApproved: true,
+      emailSubmissionRejected: true,
+      emailAdminAlert: true,
+    })
     .onConflictDoNothing()
     .returning();
-  return created ?? { id: 1, requireApproval: true, heroWords: DEFAULT_HERO_WORDS };
+  return created ?? {
+    id: 1,
+    requireApproval: true,
+    heroWords: DEFAULT_HERO_WORDS,
+    emailWelcome: true,
+    emailSubmissionReceived: true,
+    emailSubmissionApproved: true,
+    emailSubmissionRejected: true,
+    emailAdminAlert: true,
+  };
 }
 
 export async function GET() {
@@ -50,6 +68,21 @@ export async function PATCH(req: Request) {
     }
     if (typeof body.heroWords === "string") {
       updateData.heroWords = body.heroWords;
+    }
+    if (typeof body.emailWelcome === "boolean") {
+      updateData.emailWelcome = body.emailWelcome;
+    }
+    if (typeof body.emailSubmissionReceived === "boolean") {
+      updateData.emailSubmissionReceived = body.emailSubmissionReceived;
+    }
+    if (typeof body.emailSubmissionApproved === "boolean") {
+      updateData.emailSubmissionApproved = body.emailSubmissionApproved;
+    }
+    if (typeof body.emailSubmissionRejected === "boolean") {
+      updateData.emailSubmissionRejected = body.emailSubmissionRejected;
+    }
+    if (typeof body.emailAdminAlert === "boolean") {
+      updateData.emailAdminAlert = body.emailAdminAlert;
     }
 
     if (Object.keys(updateData).length === 0) {

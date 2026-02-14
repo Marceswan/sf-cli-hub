@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import { users } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { registerSchema } from "@/lib/validators";
+import { sendWelcomeEmail } from "@/lib/email";
 
 export async function POST(req: Request) {
   try {
@@ -40,6 +41,8 @@ export async function POST(req: Request) {
       email,
       passwordHash,
     });
+
+    void sendWelcomeEmail(email, name);
 
     return NextResponse.json({ success: true }, { status: 201 });
   } catch {

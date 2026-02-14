@@ -7,6 +7,7 @@ import { resourceSchema } from "@/lib/validators";
 import { slugify } from "@/lib/utils";
 import { fetchReadmeAsHtml, markdownToSafeHtml } from "@/lib/github";
 import { getRequireApproval } from "@/lib/settings";
+import { sendSubmissionReceivedEmail } from "@/lib/email";
 
 export async function GET(req: Request) {
   try {
@@ -210,6 +211,22 @@ export async function POST(req: Request) {
       await db.insert(resourceTags).values(
         tagIds.map((tagId) => ({ resourceId: resource.id, tagId }))
       );
+    }
+
+    // Send submission-received email (fire-and-forget)
+    if (resource.status === "pending") {
+      const [author] = await db
+        .select({ email: users.email, name: users.name })
+        .from(users)
+        .where(eq(users.id, session.user.id))
+        .limit(1);
+      if (author) {
+        void sendSubmissionReceivedEmail(
+          author.email,
+          author.name || "",
+          resource.name
+        );
+      }
     }
 
     return NextResponse.json(resource, { status: 201 });

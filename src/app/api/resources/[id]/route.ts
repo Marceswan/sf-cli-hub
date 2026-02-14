@@ -4,6 +4,10 @@ import { resources, users, reviews, resourceTags, tags } from "@/lib/db/schema";
 import { eq, sql } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { fetchReadmeAsHtml, markdownToSafeHtml } from "@/lib/github";
+import {
+  sendSubmissionApprovedEmail,
+  sendSubmissionRejectedEmail,
+} from "@/lib/email";
 
 export async function GET(
   _req: Request,
@@ -161,6 +165,31 @@ export async function PATCH(
       .set(updateData)
       .where(eq(resources.id, id))
       .returning();
+
+    // Send approval/rejection email if admin changed status
+    if (isAdmin && body.status && body.status !== existing.status) {
+      const [author] = await db
+        .select({ email: users.email, name: users.name })
+        .from(users)
+        .where(eq(users.id, existing.authorId))
+        .limit(1);
+      if (author) {
+        if (body.status === "approved") {
+          void sendSubmissionApprovedEmail(
+            author.email,
+            author.name || "",
+            updated.name,
+            updated.slug
+          );
+        } else if (body.status === "rejected") {
+          void sendSubmissionRejectedEmail(
+            author.email,
+            author.name || "",
+            updated.name
+          );
+        }
+      }
+    }
 
     // Update tags if provided
     if (Array.isArray(body.tagIds)) {

@@ -3,6 +3,8 @@ import { getUserSubscription } from "@/lib/subscription";
 import { stripe } from "@/lib/stripe";
 import { NextRequest, NextResponse } from "next/server";
 
+const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://sfdxhub.com";
+
 export async function POST(req: NextRequest) {
   try {
     // Require authentication
@@ -24,7 +26,7 @@ export async function POST(req: NextRequest) {
     // Create Stripe billing portal session
     const session = await stripe.billingPortal.sessions.create({
       customer: subscription.stripeCustomerId,
-      return_url: `${process.env.NEXT_PUBLIC_APP_URL}/settings/billing`,
+      return_url: `${BASE_URL}/settings/billing`,
     });
 
     return NextResponse.json({ url: session.url });

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useSession, signOut } from "next-auth/react";
-import { Menu, X, Rss, User, LogOut, Shield, PackagePlus } from "lucide-react";
+import { Menu, X, Rss, User, LogOut, Shield, PackagePlus, BarChart3, CreditCard } from "lucide-react";
 import { ThemeToggle } from "./theme-toggle";
 import { cn } from "@/lib/utils";
 
@@ -94,6 +94,22 @@ export function Header() {
                     >
                       <PackagePlus size={14} />
                       Submit Tool
+                    </Link>
+                    <Link
+                      href="/dashboard/analytics"
+                      className="flex items-center gap-2 px-3 py-2 text-sm text-text-muted hover:text-text-main hover:bg-bg-surface transition-colors"
+                      onClick={() => setUserMenuOpen(false)}
+                    >
+                      <BarChart3 size={14} />
+                      Analytics
+                    </Link>
+                    <Link
+                      href="/settings/billing"
+                      className="flex items-center gap-2 px-3 py-2 text-sm text-text-muted hover:text-text-main hover:bg-bg-surface transition-colors"
+                      onClick={() => setUserMenuOpen(false)}
+                    >
+                      <CreditCard size={14} />
+                      Billing
                     </Link>
                     {isAdmin && (
                       <Link

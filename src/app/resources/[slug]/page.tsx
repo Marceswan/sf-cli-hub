@@ -13,6 +13,8 @@ import { getCurrentUser } from "@/lib/auth-utils";
 import { ExternalLink, Github } from "lucide-react";
 import Link from "next/link";
 import { ResourceOwnerActions } from "@/components/resource/resource-owner-actions";
+import { DetailViewTracker } from "@/components/analytics/detail-view-tracker";
+import { TrackedLinks } from "@/components/resource/tracked-links";
 
 export const dynamic = "force-dynamic";
 
@@ -112,6 +114,7 @@ export default async function ResourceDetailPage({ params }: PageProps) {
 
   return (
     <div className="grid grid-cols-[1fr_minmax(0,1200px)_1fr]">
+      <DetailViewTracker listingId={resource.id} />
       <div className="max-sm:hidden grid-line-pattern" />
       <div className="col-start-2 px-6 py-12">
       {/* Breadcrumb */}
@@ -249,44 +252,13 @@ export default async function ResourceDetailPage({ params }: PageProps) {
             </dl>
           </div>
 
-          {/* Links */}
-          <div className="bg-bg-card border border-border rounded-card p-6 space-y-3">
-            <h3 className="font-semibold mb-4">Links</h3>
-            {resource.repositoryUrl && (
-              <a
-                href={resource.repositoryUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 text-sm text-text-muted hover:text-primary transition-colors"
-              >
-                <Github size={16} />
-                Repository
-                <ExternalLink size={12} />
-              </a>
-            )}
-            {resource.npmUrl && (
-              <a
-                href={resource.npmUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 text-sm text-text-muted hover:text-primary transition-colors"
-              >
-                <ExternalLink size={16} />
-                npm Package
-              </a>
-            )}
-            {resource.documentationUrl && (
-              <a
-                href={resource.documentationUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 text-sm text-text-muted hover:text-primary transition-colors"
-              >
-                <ExternalLink size={16} />
-                Documentation
-              </a>
-            )}
-          </div>
+          {/* Links (with outbound click tracking) */}
+          <TrackedLinks
+            listingId={resource.id}
+            repositoryUrl={resource.repositoryUrl}
+            npmUrl={resource.npmUrl}
+            documentationUrl={resource.documentationUrl}
+          />
         </div>
       </div>
       </div>

@@ -16,6 +16,7 @@ import type { AdapterAccountType } from "next-auth/adapters";
 
 /* ─── Enums ─── */
 export const userRoleEnum = pgEnum("user_role", ["user", "admin"]);
+export const userStatusEnum = pgEnum("user_status", ["active", "suspended", "banned"]);
 export const resourceCategoryEnum = pgEnum("resource_category", [
   "cli-plugins",
   "lwc-library",
@@ -39,6 +40,7 @@ export const users = pgTable("users", {
   image: text("image"),
   passwordHash: text("password_hash"),
   role: userRoleEnum("role").default("user").notNull(),
+  status: userStatusEnum("status").default("active").notNull(),
   bio: text("bio"),
   githubUrl: text("github_url"),
   createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
@@ -181,6 +183,20 @@ export const resourceScreenshots = pgTable("resource_screenshots", {
   createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
 });
 
+/* ─── Invitations ─── */
+export const invitations = pgTable("invitations", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  email: text("email").notNull(),
+  role: userRoleEnum("role").default("user").notNull(),
+  invitedBy: uuid("invited_by")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  token: text("token").unique().notNull(),
+  expiresAt: timestamp("expires_at", { mode: "date" }).notNull(),
+  acceptedAt: timestamp("accepted_at", { mode: "date" }),
+  createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+});
+
 /* ─── Site Settings (single-row config) ─── */
 export const siteSettings = pgTable("site_settings", {
   id: integer("id").primaryKey().default(1),
@@ -191,6 +207,9 @@ export const siteSettings = pgTable("site_settings", {
   emailSubmissionApproved: boolean("email_submission_approved").default(true).notNull(),
   emailSubmissionRejected: boolean("email_submission_rejected").default(true).notNull(),
   emailAdminAlert: boolean("email_admin_alert").default(true).notNull(),
+  emailUserSuspended: boolean("email_user_suspended").default(true).notNull(),
+  emailUserBanned: boolean("email_user_banned").default(true).notNull(),
+  emailUserRestored: boolean("email_user_restored").default(true).notNull(),
 });
 
 /* ─── Page Views (Analytics) ─── */
@@ -229,3 +248,5 @@ export type ResourceScreenshot = typeof resourceScreenshots.$inferSelect;
 export type NewResourceScreenshot = typeof resourceScreenshots.$inferInsert;
 export type PageView = typeof pageViews.$inferSelect;
 export type NewPageView = typeof pageViews.$inferInsert;
+export type Invitation = typeof invitations.$inferSelect;
+export type NewInvitation = typeof invitations.$inferInsert;

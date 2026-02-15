@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Github } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,8 @@ import { Input } from "@/components/ui/input";
 
 export default function RegisterPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const inviteToken = searchParams.get("invite") || undefined;
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -27,7 +29,7 @@ export default function RegisterPage() {
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password }),
+        body: JSON.stringify({ name, email, password, inviteToken }),
       });
 
       if (!res.ok) {
@@ -63,7 +65,9 @@ export default function RegisterPage() {
       <div className="bg-bg-card border border-border rounded-card p-8">
         <h1 className="text-2xl font-bold mb-2">Create an account</h1>
         <p className="text-text-muted text-sm mb-8">
-          Join the Salesforce developer community
+          {inviteToken
+            ? "You've been invited to join the Salesforce developer community"
+            : "Join the Salesforce developer community"}
         </p>
 
         {/* GitHub OAuth */}

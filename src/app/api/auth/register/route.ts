@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { db } from "@/lib/db";
-import { users } from "@/lib/db/schema";
-import { eq } from "drizzle-orm";
+import { users, invitations } from "@/lib/db/schema";
+import { eq, and, gt, isNull } from "drizzle-orm";
 import { registerSchema } from "@/lib/validators";
 import { sendWelcomeEmail } from "@/lib/email";
 
@@ -19,6 +19,7 @@ export async function POST(req: Request) {
     }
 
     const { name, email, password } = parsed.data;
+    const inviteToken = body.inviteToken as string | undefined;
 
     // Check if user already exists
     const [existing] = await db
@@ -36,10 +37,36 @@ export async function POST(req: Request) {
 
     const passwordHash = await bcrypt.hash(password, 12);
 
+    // Check for valid invitation token
+    let invitedRole: "user" | "admin" = "user";
+    if (inviteToken) {
+      const [invite] = await db
+        .select()
+        .from(invitations)
+        .where(
+          and(
+            eq(invitations.token, inviteToken),
+            gt(invitations.expiresAt, new Date()),
+            isNull(invitations.acceptedAt)
+          )
+        )
+        .limit(1);
+
+      if (invite) {
+        invitedRole = invite.role;
+        // Mark invitation as accepted
+        await db
+          .update(invitations)
+          .set({ acceptedAt: new Date() })
+          .where(eq(invitations.id, invite.id));
+      }
+    }
+
     await db.insert(users).values({
       name,
       email,
       passwordHash,
+      role: invitedRole,
     });
 
     void sendWelcomeEmail(email, name);

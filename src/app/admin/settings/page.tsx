@@ -20,6 +20,9 @@ export default function AdminSettingsPage() {
     emailSubmissionApproved: true,
     emailSubmissionRejected: true,
     emailAdminAlert: true,
+    emailUserSuspended: true,
+    emailUserBanned: true,
+    emailUserRestored: true,
   });
   const [savingEmail, setSavingEmail] = useState<string | null>(null);
 
@@ -39,6 +42,9 @@ export default function AdminSettingsPage() {
           emailSubmissionApproved: data.emailSubmissionApproved ?? true,
           emailSubmissionRejected: data.emailSubmissionRejected ?? true,
           emailAdminAlert: data.emailAdminAlert ?? true,
+          emailUserSuspended: data.emailUserSuspended ?? true,
+          emailUserBanned: data.emailUserBanned ?? true,
+          emailUserRestored: data.emailUserRestored ?? true,
         });
       })
       .finally(() => setLoading(false));
@@ -234,6 +240,9 @@ export default function AdminSettingsPage() {
             { key: "emailSubmissionApproved" as const, label: "Submission Approved", desc: "Notify the submitter when their resource is approved." },
             { key: "emailSubmissionRejected" as const, label: "Submission Rejected", desc: "Notify the submitter when their resource is not approved." },
             { key: "emailAdminAlert" as const, label: "Admin New Submission Alert", desc: "Email all admins when a new resource is submitted for review." },
+            { key: "emailUserSuspended" as const, label: "User Suspended", desc: "Notify the user when their account is suspended." },
+            { key: "emailUserBanned" as const, label: "User Banned", desc: "Notify the user when their account is banned." },
+            { key: "emailUserRestored" as const, label: "User Restored", desc: "Notify the user when their account is restored to active." },
           ]).map(({ key, label, desc }) => (
             <div key={key} className="flex items-center justify-between">
               <div>

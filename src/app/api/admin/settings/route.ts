@@ -21,6 +21,9 @@ async function getSettings() {
       emailSubmissionApproved: true,
       emailSubmissionRejected: true,
       emailAdminAlert: true,
+      emailUserSuspended: true,
+      emailUserBanned: true,
+      emailUserRestored: true,
     })
     .onConflictDoNothing()
     .returning();
@@ -33,6 +36,9 @@ async function getSettings() {
     emailSubmissionApproved: true,
     emailSubmissionRejected: true,
     emailAdminAlert: true,
+    emailUserSuspended: true,
+    emailUserBanned: true,
+    emailUserRestored: true,
   };
 }
 
@@ -83,6 +89,15 @@ export async function PATCH(req: Request) {
     }
     if (typeof body.emailAdminAlert === "boolean") {
       updateData.emailAdminAlert = body.emailAdminAlert;
+    }
+    if (typeof body.emailUserSuspended === "boolean") {
+      updateData.emailUserSuspended = body.emailUserSuspended;
+    }
+    if (typeof body.emailUserBanned === "boolean") {
+      updateData.emailUserBanned = body.emailUserBanned;
+    }
+    if (typeof body.emailUserRestored === "boolean") {
+      updateData.emailUserRestored = body.emailUserRestored;
     }
 
     if (Object.keys(updateData).length === 0) {

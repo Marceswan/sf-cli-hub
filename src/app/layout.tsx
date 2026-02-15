@@ -5,6 +5,7 @@ import { SessionProvider } from "@/components/providers/session-provider";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { PageViewTracker } from "@/components/analytics/page-view-tracker";
+import { EventTrackerProvider } from "@/components/analytics/event-tracker-provider";
 import "./globals.css";
 
 const inter = Inter({
@@ -34,6 +35,7 @@ export default function RootLayout({
         <SessionProvider>
           <ThemeProvider>
             <PageViewTracker />
+            <EventTrackerProvider />
             <Header />
             <main className="flex-1 flex flex-col pt-[70px]">{children}</main>
             <Footer />

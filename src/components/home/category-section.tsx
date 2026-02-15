@@ -5,6 +5,7 @@ import { ResourceCard } from "@/components/resource/resource-card";
 import { useGsapFadeIn } from "@/hooks/use-gsap";
 
 interface CategoryResource {
+  id?: string;
   slug: string;
   name: string;
   description: string;
@@ -58,9 +59,14 @@ export function CategorySection({
         ref={gridRef}
         className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
       >
-        {resources.map((resource) => (
+        {resources.map((resource, index) => (
           <div key={resource.slug} data-card>
-            <ResourceCard {...resource} />
+            <ResourceCard
+              {...resource}
+              listingId={resource.id}
+              surface="home_featured"
+              position={index}
+            />
           </div>
         ))}
       </div>

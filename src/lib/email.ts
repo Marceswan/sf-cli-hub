@@ -17,7 +17,7 @@ const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://sfdxhub.com";
 
 // ─── Shared HTML Layout ───
 
-function wrapInLayout(content: string): string {
+export function wrapInLayout(content: string): string {
   return `<!DOCTYPE html>
 <html>
 <head>

@@ -52,6 +52,15 @@ export function BrowseContent() {
   const [page, setPage] = useState(
     parseInt(searchParams.get("page") || "1")
   );
+
+  // Sync state when searchParams change from external navigation (e.g. mobile nav links)
+  useEffect(() => {
+    setCategory(searchParams.get("category") || "");
+    setTag(searchParams.get("tag") || "");
+    setSearch(searchParams.get("q") || "");
+    setSort(searchParams.get("sort") || "newest");
+    setPage(parseInt(searchParams.get("page") || "1"));
+  }, [searchParams]);
   const [resources, setResources] = useState<ResourceItem[]>([]);
   const [pagination, setPagination] = useState<PaginationInfo | null>(null);
   const [loading, setLoading] = useState(true);

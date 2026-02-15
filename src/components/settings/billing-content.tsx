@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import type { Subscription } from "@/lib/db/schema";
 import { formatDate } from "@/lib/utils";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 
 interface BillingContentProps {
   subscription: Subscription | null;
@@ -14,17 +14,41 @@ interface BillingContentProps {
 }
 
 function BillingContentInner({
-  subscription,
+  subscription: initialSubscription,
   userName,
   userEmail,
 }: BillingContentProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [loading, setLoading] = useState<string | null>(null);
+  const [subscription, setSubscription] = useState<Subscription | null>(
+    initialSubscription
+  );
   const [message, setMessage] = useState<{
     type: "success" | "error";
     text: string;
   } | null>(null);
+  const pollCountRef = useRef(0);
+
+  // Poll for subscription updates after successful checkout
+  const pollSubscription = useCallback(async () => {
+    try {
+      const res = await fetch("/api/stripe/subscription?sync=true");
+      if (!res.ok) return false;
+      const data = await res.json();
+      if (
+        data.subscription &&
+        (data.subscription.plan === "pro_monthly" ||
+          data.subscription.plan === "pro_annual")
+      ) {
+        setSubscription(data.subscription);
+        return true;
+      }
+      return false;
+    } catch {
+      return false;
+    }
+  }, []);
 
   // Handle success/cancel feedback from URL params
   useEffect(() => {
@@ -33,8 +57,21 @@ function BillingContentInner({
         type: "success",
         text: "Subscription started successfully! Your trial period has begun.",
       });
+
+      // Poll for the webhook to update the subscription (up to 15s)
+      pollCountRef.current = 0;
+      const interval = setInterval(async () => {
+        pollCountRef.current += 1;
+        const updated = await pollSubscription();
+        if (updated || pollCountRef.current >= 5) {
+          clearInterval(interval);
+        }
+      }, 3000);
+
       // Clean up URL
       router.replace("/settings/billing");
+
+      return () => clearInterval(interval);
     } else if (searchParams.get("canceled") === "true") {
       setMessage({
         type: "error",
@@ -43,7 +80,7 @@ function BillingContentInner({
       // Clean up URL
       router.replace("/settings/billing");
     }
-  }, [searchParams, router]);
+  }, [searchParams, router, pollSubscription]);
 
   const isProPlan =
     subscription?.plan === "pro_monthly" || subscription?.plan === "pro_annual";
@@ -274,7 +311,7 @@ function BillingContentInner({
             </div>
 
             {/* Annual Plan */}
-            <div className="bg-bg-card border-2 border-primary rounded-card p-6 flex flex-col relative">
+            <div className="bg-bg-card border-2 border-primary rounded-card p-6 flex flex-col relative overflow-visible">
               <div className="absolute -top-3 left-1/2 -translate-x-1/2">
                 <Badge variant="primary">Best Value</Badge>
               </div>

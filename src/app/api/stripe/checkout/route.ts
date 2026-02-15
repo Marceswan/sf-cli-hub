@@ -4,6 +4,8 @@ import { stripe } from "@/lib/stripe";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
+const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://sfdxhub.com";
+
 const checkoutSchema = z.object({
   plan: z.enum(["pro_monthly", "pro_annual"]),
 });
@@ -52,8 +54,8 @@ export async function POST(req: NextRequest) {
           userId: user.id,
         },
       },
-      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/settings/billing?success=true`,
-      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/settings/billing?canceled=true`,
+      success_url: `${BASE_URL}/settings/billing?success=true`,
+      cancel_url: `${BASE_URL}/settings/billing?canceled=true`,
       allow_promotion_codes: true,
       metadata: {
         userId: user.id,

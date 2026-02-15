@@ -8,6 +8,17 @@ export default auth((req) => {
   const { pathname } = req.nextUrl;
   const isLoggedIn = !!req.auth;
   const isAdmin = req.auth?.user?.role === "admin";
+  const userStatus = req.auth?.user?.status;
+
+  // Block suspended/banned users from all pages (redirect to login)
+  if (isLoggedIn && userStatus && userStatus !== "active") {
+    // Allow access to login page and API routes to prevent redirect loops
+    if (!pathname.startsWith("/login") && !pathname.startsWith("/api")) {
+      const url = new URL("/login", req.url);
+      url.searchParams.set("error", "account_suspended");
+      return NextResponse.redirect(url);
+    }
+  }
 
   // Protected routes: require login
   const isEditRoute = /^\/resources\/[^/]+\/edit$/.test(pathname);
@@ -34,5 +45,7 @@ export default auth((req) => {
 });
 
 export const config = {
-  matcher: ["/submit/:path*", "/profile/:path*", "/admin/:path*", "/resources/:path*/edit"],
+  matcher: [
+    "/((?!_next/static|_next/image|favicon.ico|email-logo.png).*)",
+  ],
 };

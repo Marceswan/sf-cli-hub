@@ -143,6 +143,82 @@ function submissionRejectedContent(userName: string, resourceName: string) {
   };
 }
 
+function userSuspendedContent(userName: string) {
+  const greeting = userName ? `Hi ${userName},` : "Hi there,";
+  return {
+    subject: "Your SFDX Hub account has been suspended",
+    html: wrapInLayout(`
+      <h1 style="margin:0 0 16px;font-size:24px;color:#0f172a;">Account Suspended</h1>
+      <p style="margin:0 0 16px;font-size:16px;color:#3f3f46;line-height:1.6;">
+        ${greeting}
+      </p>
+      <p style="margin:0 0 16px;font-size:16px;color:#3f3f46;line-height:1.6;">
+        Your SFDX Hub account has been temporarily suspended. While suspended, you won&rsquo;t be able to sign in or access your account.
+      </p>
+      <p style="margin:0;font-size:14px;color:#71717a;">
+        If you believe this was a mistake, please contact our support team.
+      </p>
+    `),
+  };
+}
+
+function userBannedContent(userName: string) {
+  const greeting = userName ? `Hi ${userName},` : "Hi there,";
+  return {
+    subject: "Your SFDX Hub account has been banned",
+    html: wrapInLayout(`
+      <h1 style="margin:0 0 16px;font-size:24px;color:#0f172a;">Account Banned</h1>
+      <p style="margin:0 0 16px;font-size:16px;color:#3f3f46;line-height:1.6;">
+        ${greeting}
+      </p>
+      <p style="margin:0 0 16px;font-size:16px;color:#3f3f46;line-height:1.6;">
+        Your SFDX Hub account has been permanently banned due to a violation of our community guidelines. You will no longer be able to sign in.
+      </p>
+      <p style="margin:0;font-size:14px;color:#71717a;">
+        If you believe this was a mistake, please contact our support team.
+      </p>
+    `),
+  };
+}
+
+function userRestoredContent(userName: string) {
+  const greeting = userName ? `Hi ${userName},` : "Hi there,";
+  return {
+    subject: "Your SFDX Hub account has been restored",
+    html: wrapInLayout(`
+      <h1 style="margin:0 0 16px;font-size:24px;color:#0f172a;">Account Restored</h1>
+      <p style="margin:0 0 16px;font-size:16px;color:#3f3f46;line-height:1.6;">
+        ${greeting}
+      </p>
+      <p style="margin:0 0 16px;font-size:16px;color:#3f3f46;line-height:1.6;">
+        Great news &mdash; your SFDX Hub account has been restored. You can now sign in and use the platform again.
+      </p>
+      <a href="${BASE_URL}/login" style="display:inline-block;padding:12px 24px;background-color:#22c55e;color:#ffffff;text-decoration:none;border-radius:6px;font-weight:600;font-size:14px;">
+        Sign In
+      </a>
+    `),
+  };
+}
+
+function invitationContent(token: string) {
+  const inviteUrl = `${BASE_URL}/register?invite=${token}`;
+  return {
+    subject: "You've been invited to SFDX Hub",
+    html: wrapInLayout(`
+      <h1 style="margin:0 0 16px;font-size:24px;color:#0f172a;">You&rsquo;re Invited!</h1>
+      <p style="margin:0 0 16px;font-size:16px;color:#3f3f46;line-height:1.6;">
+        An admin has invited you to join SFDX Hub &mdash; the community-driven resource hub for Salesforce developers.
+      </p>
+      <p style="margin:0 0 16px;font-size:16px;color:#3f3f46;line-height:1.6;">
+        Click the button below to create your account. This invitation expires in 7 days.
+      </p>
+      <a href="${inviteUrl}" style="display:inline-block;padding:12px 24px;background-color:#3b82f6;color:#ffffff;text-decoration:none;border-radius:6px;font-weight:600;font-size:14px;">
+        Accept Invitation
+      </a>
+    `),
+  };
+}
+
 function adminSubmissionAlertContent(resourceName: string, authorName: string) {
   return {
     subject: `New submission from ${authorName}: ${resourceName}`,
@@ -264,5 +340,51 @@ export async function sendAdminSubmissionAlert(
     console.log(`[email] Admin submission alert sent to ${admins.length} admin(s)`);
   } catch (error) {
     console.error(`[email] Failed to send admin submission alert:`, error);
+  }
+}
+
+export async function sendUserSuspendedEmail(email: string, userName: string) {
+  try {
+    const settings = await getEmailSettings();
+    if (!settings.emailUserSuspended) return;
+    const { subject, html } = userSuspendedContent(userName);
+    await getResend()?.emails.send({ from: FROM, to: email, subject, html });
+    console.log(`[email] User suspended email sent to ${email}`);
+  } catch (error) {
+    console.error(`[email] Failed to send user suspended email to ${email}:`, error);
+  }
+}
+
+export async function sendUserBannedEmail(email: string, userName: string) {
+  try {
+    const settings = await getEmailSettings();
+    if (!settings.emailUserBanned) return;
+    const { subject, html } = userBannedContent(userName);
+    await getResend()?.emails.send({ from: FROM, to: email, subject, html });
+    console.log(`[email] User banned email sent to ${email}`);
+  } catch (error) {
+    console.error(`[email] Failed to send user banned email to ${email}:`, error);
+  }
+}
+
+export async function sendUserRestoredEmail(email: string, userName: string) {
+  try {
+    const settings = await getEmailSettings();
+    if (!settings.emailUserRestored) return;
+    const { subject, html } = userRestoredContent(userName);
+    await getResend()?.emails.send({ from: FROM, to: email, subject, html });
+    console.log(`[email] User restored email sent to ${email}`);
+  } catch (error) {
+    console.error(`[email] Failed to send user restored email to ${email}:`, error);
+  }
+}
+
+export async function sendInvitationEmail(email: string, token: string) {
+  try {
+    const { subject, html } = invitationContent(token);
+    await getResend()?.emails.send({ from: FROM, to: email, subject, html });
+    console.log(`[email] Invitation email sent to ${email}`);
+  } catch (error) {
+    console.error(`[email] Failed to send invitation email to ${email}:`, error);
   }
 }

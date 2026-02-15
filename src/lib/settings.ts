@@ -14,5 +14,8 @@ export async function getEmailSettings() {
     emailSubmissionApproved: row?.emailSubmissionApproved ?? true,
     emailSubmissionRejected: row?.emailSubmissionRejected ?? true,
     emailAdminAlert: row?.emailAdminAlert ?? true,
+    emailUserSuspended: row?.emailUserSuspended ?? true,
+    emailUserBanned: row?.emailUserBanned ?? true,
+    emailUserRestored: row?.emailUserRestored ?? true,
   };
 }

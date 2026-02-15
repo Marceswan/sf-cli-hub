@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Inbox, Database, Tag, Settings } from "lucide-react";
+import { LayoutDashboard, Inbox, Database, Tag, Users, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const adminNav = [
@@ -10,6 +10,7 @@ const adminNav = [
   { href: "/admin/submissions", label: "Submissions", icon: Inbox },
   { href: "/admin/resources", label: "Resources", icon: Database },
   { href: "/admin/tags", label: "Tags", icon: Tag },
+  { href: "/admin/users", label: "Users", icon: Users },
   { href: "/admin/settings", label: "Settings", icon: Settings },
 ];
 

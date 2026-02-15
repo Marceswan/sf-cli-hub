@@ -286,13 +286,13 @@ export function AnalyticsDashboard({ listings, isPro }: AnalyticsDashboardProps)
       {/* Badge + Digest Settings */}
       {selectedListing && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <BadgeSection isPro={isPro} slug={selectedListing.slug} />
+          <BadgeSection slug={selectedListing.slug} />
           <DigestSettings isPro={isPro} />
         </div>
       )}
       {listingId === "all" && listings.length > 0 && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <BadgeSection isPro={isPro} slug={listings[0].slug} />
+          <BadgeSection slug={listings[0].slug} />
           <DigestSettings isPro={isPro} />
         </div>
       )}

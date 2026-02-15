@@ -9,6 +9,7 @@ import { TrafficCharts } from "./traffic-charts";
 import { PagesTable } from "./pages-table";
 import { CategoryCharts } from "./category-charts";
 import { AudienceCharts } from "./audience-charts";
+import { EventsCharts } from "./events-charts";
 
 interface Overview {
   totalViews: number;
@@ -25,19 +26,21 @@ export function PulseDashboard() {
   const [pages, setPages] = useState([]);
   const [categories, setCategories] = useState([]);
   const [audience, setAudience] = useState<{ daily: []; totals: { authenticated: 0; anonymous: 0 } } | null>(null);
+  const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const fetchAll = useCallback(async () => {
     setLoading(true);
     try {
       const qs = `range=${range}`;
-      const [ov, daily, hourly, pg, cat, aud] = await Promise.all([
+      const [ov, daily, hourly, pg, cat, aud, evt] = await Promise.all([
         fetch(`/api/admin/pulse/overview?${qs}`).then((r) => r.json()),
         fetch(`/api/admin/pulse/traffic?${qs}&groupBy=day`).then((r) => r.json()),
         fetch(`/api/admin/pulse/traffic?${qs}&groupBy=hour`).then((r) => r.json()),
         fetch(`/api/admin/pulse/pages?${qs}&limit=20`).then((r) => r.json()),
         fetch(`/api/admin/pulse/categories?${qs}`).then((r) => r.json()),
         fetch(`/api/admin/pulse/audience?${qs}`).then((r) => r.json()),
+        fetch(`/api/admin/pulse/events?${qs}`).then((r) => r.json()),
       ]);
       setOverview(ov);
       setDailyTraffic(daily);
@@ -45,6 +48,7 @@ export function PulseDashboard() {
       setPages(pg);
       setCategories(cat);
       setAudience(aud);
+      setEvents(evt);
     } catch (err) {
       console.error("Failed to fetch pulse data:", err);
     } finally {
@@ -94,6 +98,7 @@ export function PulseDashboard() {
           <TabsTrigger value="pages">Pages</TabsTrigger>
           <TabsTrigger value="categories">Categories</TabsTrigger>
           <TabsTrigger value="audience">Audience</TabsTrigger>
+          <TabsTrigger value="events">Events</TabsTrigger>
         </TabsList>
 
         <TabsContent value="traffic">
@@ -126,6 +131,14 @@ export function PulseDashboard() {
           ) : audience ? (
             <AudienceCharts daily={audience.daily} totals={audience.totals} />
           ) : null}
+        </TabsContent>
+
+        <TabsContent value="events">
+          {loading ? (
+            <div className="h-[400px] rounded-xl bg-bg-surface border border-border animate-pulse" />
+          ) : (
+            <EventsCharts data={events} />
+          )}
         </TabsContent>
       </Tabs>
     </div>

@@ -212,6 +212,152 @@ export const siteSettings = pgTable("site_settings", {
   emailUserRestored: boolean("email_user_restored").default(true).notNull(),
 });
 
+/* ─── Analytics Enums ─── */
+export const analyticsEventNameEnum = pgEnum("analytics_event_name", [
+  "listing.impression",
+  "listing.detail_view",
+  "listing.outbound_click",
+  "listing.tag_click",
+  "listing.share",
+  "listing.bookmark",
+]);
+
+export const deviceCategoryEnum = pgEnum("device_category", [
+  "desktop",
+  "mobile",
+  "tablet",
+]);
+
+export const subscriptionPlanEnum = pgEnum("subscription_plan", [
+  "free",
+  "pro_monthly",
+  "pro_annual",
+]);
+
+export const subscriptionStatusEnum = pgEnum("subscription_status", [
+  "active",
+  "trialing",
+  "past_due",
+  "canceled",
+  "unpaid",
+]);
+
+/* ─── Analytics Events (raw, 90-day retention) ─── */
+export const analyticsEvents = pgTable(
+  "analytics_events",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    eventName: analyticsEventNameEnum("event_name").notNull(),
+    listingId: uuid("listing_id")
+      .notNull()
+      .references(() => resources.id, { onDelete: "cascade" }),
+    sessionId: varchar("session_id", { length: 64 }).notNull(),
+    deviceCategory: deviceCategoryEnum("device_category").notNull(),
+    surface: varchar("surface", { length: 50 }),
+    position: integer("position"),
+    destinationType: varchar("destination_type", { length: 50 }),
+    searchQuery: varchar("search_query", { length: 255 }),
+    referrer: varchar("referrer", { length: 1024 }),
+    createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+  },
+  (table) => [
+    index("ae_listing_created_idx").on(table.listingId, table.createdAt),
+    index("ae_created_at_idx").on(table.createdAt),
+    index("ae_session_id_idx").on(table.sessionId),
+    index("ae_event_name_idx").on(table.eventName),
+  ]
+);
+
+/* ─── Analytics Daily Aggregates (kept indefinitely) ─── */
+export const analyticsDaily = pgTable(
+  "analytics_daily",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    listingId: uuid("listing_id")
+      .notNull()
+      .references(() => resources.id, { onDelete: "cascade" }),
+    date: timestamp("date", { mode: "date" }).notNull(),
+    impressions: integer("impressions").default(0).notNull(),
+    detailViews: integer("detail_views").default(0).notNull(),
+    outboundClicks: integer("outbound_clicks").default(0).notNull(),
+    uniqueSessions: integer("unique_sessions").default(0).notNull(),
+    tagClicks: integer("tag_clicks").default(0).notNull(),
+    shares: integer("shares").default(0).notNull(),
+    bookmarks: integer("bookmarks").default(0).notNull(),
+    referralBreakdown: text("referral_breakdown"),
+    outboundBreakdown: text("outbound_breakdown"),
+    categoryRank: integer("category_rank"),
+    createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex("ad_listing_date_idx").on(table.listingId, table.date),
+    index("ad_date_idx").on(table.date),
+  ]
+);
+
+/* ─── Analytics Search Query Aggregates ─── */
+export const analyticsSearchQueries = pgTable(
+  "analytics_search_queries",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    listingId: uuid("listing_id")
+      .notNull()
+      .references(() => resources.id, { onDelete: "cascade" }),
+    date: timestamp("date", { mode: "date" }).notNull(),
+    query: varchar("query", { length: 255 }).notNull(),
+    count: integer("count").default(0).notNull(),
+  },
+  (table) => [
+    uniqueIndex("asq_listing_date_query_idx").on(
+      table.listingId,
+      table.date,
+      table.query
+    ),
+    index("asq_listing_id_idx").on(table.listingId),
+  ]
+);
+
+/* ─── Subscriptions (Stripe) ─── */
+export const subscriptions = pgTable(
+  "subscriptions",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    userId: uuid("user_id")
+      .notNull()
+      .unique()
+      .references(() => users.id, { onDelete: "cascade" }),
+    stripeCustomerId: varchar("stripe_customer_id", { length: 255 }).notNull(),
+    stripeSubscriptionId: varchar("stripe_subscription_id", { length: 255 }),
+    plan: subscriptionPlanEnum("plan").default("free").notNull(),
+    status: subscriptionStatusEnum("status").default("active").notNull(),
+    trialStart: timestamp("trial_start", { mode: "date" }),
+    trialEnd: timestamp("trial_end", { mode: "date" }),
+    currentPeriodStart: timestamp("current_period_start", { mode: "date" }),
+    currentPeriodEnd: timestamp("current_period_end", { mode: "date" }),
+    cancelAtPeriodEnd: boolean("cancel_at_period_end").default(false).notNull(),
+    createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { mode: "date" }).defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex("sub_stripe_customer_idx").on(table.stripeCustomerId),
+    index("sub_user_id_idx").on(table.userId),
+  ]
+);
+
+/* ─── Digest Preferences ─── */
+export const digestPreferences = pgTable("digest_preferences", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: uuid("user_id")
+    .notNull()
+    .unique()
+    .references(() => users.id, { onDelete: "cascade" }),
+  enabled: boolean("enabled").default(false).notNull(),
+  dayOfWeek: integer("day_of_week").default(1).notNull(),
+  unsubscribeToken: varchar("unsubscribe_token", { length: 64 }).notNull(),
+  createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { mode: "date" }).defaultNow().notNull(),
+});
+
 /* ─── Page Views (Analytics) ─── */
 export const pageViews = pgTable(
   "page_views",
@@ -250,3 +396,9 @@ export type PageView = typeof pageViews.$inferSelect;
 export type NewPageView = typeof pageViews.$inferInsert;
 export type Invitation = typeof invitations.$inferSelect;
 export type NewInvitation = typeof invitations.$inferInsert;
+export type AnalyticsEvent = typeof analyticsEvents.$inferSelect;
+export type NewAnalyticsEvent = typeof analyticsEvents.$inferInsert;
+export type AnalyticsDaily = typeof analyticsDaily.$inferSelect;
+export type Subscription = typeof subscriptions.$inferSelect;
+export type NewSubscription = typeof subscriptions.$inferInsert;
+export type DigestPreference = typeof digestPreferences.$inferSelect;

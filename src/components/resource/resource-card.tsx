@@ -7,6 +7,7 @@ import { Card, CardIcon, CardMeta } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Check, Copy } from "lucide-react";
 import { formatDate } from "@/lib/utils";
+import { useImpressionTracker } from "@/hooks/use-impression-tracker";
 
 interface TagInfo {
   id: string;
@@ -26,6 +27,12 @@ interface ResourceCardProps {
   category?: string;
   tags?: TagInfo[];
   createdAt?: string;
+  /** Analytics: listing UUID for impression tracking */
+  listingId?: string;
+  /** Analytics: surface identifier (e.g. "browse_grid", "home_featured") */
+  surface?: string;
+  /** Analytics: position index in the list */
+  position?: number;
 }
 
 export function ResourceCard({
@@ -37,9 +44,13 @@ export function ResourceCard({
   category,
   tags = [],
   createdAt,
+  listingId,
+  surface,
+  position,
 }: ResourceCardProps) {
   const router = useRouter();
   const [copied, setCopied] = useState(false);
+  const impressionRef = useImpressionTracker(listingId, surface, position);
   const isLwc = category === "lwc-library";
   const isCli = category === "cli-plugins";
   const visibleTags = tags.slice(0, 3);
@@ -55,6 +66,7 @@ export function ResourceCard({
 
   return (
     <div
+      ref={impressionRef}
       role="link"
       tabIndex={0}
       onClick={() => router.push(`/resources/${slug}`)}

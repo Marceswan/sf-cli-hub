@@ -2,11 +2,16 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { digestPreferences } from "@/lib/db/schema";
 import { isProUser } from "@/lib/subscription";
+import { isFeatureEnabled } from "@/lib/settings";
 import { eq } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
 
 export async function GET(req: NextRequest) {
+  if (!(await isFeatureEnabled("pro"))) {
+    return NextResponse.json({ error: "This feature is not currently available" }, { status: 404 });
+  }
+
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -36,6 +41,10 @@ export async function GET(req: NextRequest) {
 }
 
 export async function PUT(req: NextRequest) {
+  if (!(await isFeatureEnabled("pro"))) {
+    return NextResponse.json({ error: "This feature is not currently available" }, { status: 404 });
+  }
+
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

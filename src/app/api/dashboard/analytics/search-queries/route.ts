@@ -3,10 +3,15 @@ import { db } from "@/lib/db";
 import { resources, analyticsSearchQueries } from "@/lib/db/schema";
 import { parseDateRange } from "@/lib/analytics/date-range";
 import { isProUser } from "@/lib/subscription";
+import { isFeatureEnabled } from "@/lib/settings";
 import { eq, and, gte, lte, sql, desc } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
+  if (!(await isFeatureEnabled("pro"))) {
+    return NextResponse.json({ error: "This feature is not currently available" }, { status: 404 });
+  }
+
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

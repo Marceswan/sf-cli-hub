@@ -2,11 +2,16 @@ import { getCurrentUser } from "@/lib/auth-utils";
 import { getUserSubscription } from "@/lib/subscription";
 import { stripe } from "@/lib/stripe";
 import { NextRequest, NextResponse } from "next/server";
+import { isFeatureEnabled } from "@/lib/settings";
 
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://sfdxhub.com";
 
 export async function POST(req: NextRequest) {
   try {
+    if (!(await isFeatureEnabled("pro"))) {
+      return NextResponse.json({ error: "This feature is not currently available" }, { status: 404 });
+    }
+
     // Require authentication
     const user = await getCurrentUser();
     if (!user?.id) {

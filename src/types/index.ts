@@ -31,3 +31,6 @@ export type ResourceCategory = "cli-plugins" | "lwc-library" | "apex-utilities" 
 export type ResourceStatus = "pending" | "approved" | "rejected";
 export type UserRole = "user" | "admin";
 export type UserStatus = "active" | "suspended" | "banned";
+
+export type FeatureFlagKey = "pro";
+export type FeatureFlags = Record<FeatureFlagKey, boolean>;

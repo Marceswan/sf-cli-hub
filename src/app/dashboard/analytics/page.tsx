@@ -5,10 +5,13 @@ import { resources } from "@/lib/db/schema";
 import { and, eq } from "drizzle-orm";
 import { isProUser } from "@/lib/subscription";
 import { AnalyticsDashboard } from "@/components/dashboard/analytics-dashboard";
+import { isFeatureEnabled } from "@/lib/settings";
 
 export const metadata = { title: "Analytics | SFDXHub" };
 
 export default async function AnalyticsPage() {
+  if (!(await isFeatureEnabled("pro"))) redirect("/");
+
   const session = await auth();
   if (!session?.user?.id) redirect("/login");
 

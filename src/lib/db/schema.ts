@@ -7,6 +7,7 @@ import {
   boolean,
   integer,
   decimal,
+  jsonb,
   uniqueIndex,
   primaryKey,
   pgEnum,
@@ -210,6 +211,7 @@ export const siteSettings = pgTable("site_settings", {
   emailUserSuspended: boolean("email_user_suspended").default(true).notNull(),
   emailUserBanned: boolean("email_user_banned").default(true).notNull(),
   emailUserRestored: boolean("email_user_restored").default(true).notNull(),
+  featureFlags: jsonb("feature_flags").$type<Record<string, boolean>>().default({}).notNull(),
 });
 
 /* ─── Analytics Enums ─── */

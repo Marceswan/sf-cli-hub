@@ -6,6 +6,7 @@ import { useSession, signOut } from "next-auth/react";
 import { Menu, X, Rss, User, LogOut, Shield, PackagePlus, BarChart3, CreditCard } from "lucide-react";
 import { ThemeToggle } from "./theme-toggle";
 import { cn } from "@/lib/utils";
+import { useFeatureFlag } from "@/lib/feature-flags-context";
 
 const navLinks = [
   { href: "/browse?category=cli-plugins", label: "CLI Plugins" },
@@ -23,6 +24,7 @@ export function Header() {
 
   const user = session?.user;
   const isAdmin = user?.role === "admin";
+  const proEnabled = useFeatureFlag("pro");
 
   return (
     <header className="fixed top-0 w-full z-50 glass border-b border-border">
@@ -95,22 +97,26 @@ export function Header() {
                       <PackagePlus size={14} />
                       Submit Tool
                     </Link>
-                    <Link
-                      href="/dashboard/analytics"
-                      className="flex items-center gap-2 px-3 py-2 text-sm text-text-muted hover:text-text-main hover:bg-bg-surface transition-colors"
-                      onClick={() => setUserMenuOpen(false)}
-                    >
-                      <BarChart3 size={14} />
-                      Analytics
-                    </Link>
-                    <Link
-                      href="/settings/billing"
-                      className="flex items-center gap-2 px-3 py-2 text-sm text-text-muted hover:text-text-main hover:bg-bg-surface transition-colors"
-                      onClick={() => setUserMenuOpen(false)}
-                    >
-                      <CreditCard size={14} />
-                      Billing
-                    </Link>
+                    {proEnabled && (
+                      <Link
+                        href="/dashboard/analytics"
+                        className="flex items-center gap-2 px-3 py-2 text-sm text-text-muted hover:text-text-main hover:bg-bg-surface transition-colors"
+                        onClick={() => setUserMenuOpen(false)}
+                      >
+                        <BarChart3 size={14} />
+                        Analytics
+                      </Link>
+                    )}
+                    {proEnabled && (
+                      <Link
+                        href="/settings/billing"
+                        className="flex items-center gap-2 px-3 py-2 text-sm text-text-muted hover:text-text-main hover:bg-bg-surface transition-colors"
+                        onClick={() => setUserMenuOpen(false)}
+                      >
+                        <CreditCard size={14} />
+                        Billing
+                      </Link>
+                    )}
                     {isAdmin && (
                       <Link
                         href="/admin"

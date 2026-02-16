@@ -3,9 +3,7 @@ export const dynamic = "force-dynamic";
 import { db } from "@/lib/db";
 import { resources, users, resourceTags, tags } from "@/lib/db/schema";
 import { eq, sql, inArray } from "drizzle-orm";
-import { Badge } from "@/components/ui/badge";
-import { formatDate } from "@/lib/utils";
-import { ResourceActions } from "@/components/admin/resource-actions";
+import { AdminResourcesTable } from "@/components/admin/admin-resources-table";
 
 export default async function AdminResourcesPage() {
   const allResources = await db
@@ -46,108 +44,10 @@ export default async function AdminResourcesPage() {
     }, {} as typeof tagsByResource);
   }
 
-  const statusVariant: Record<string, "success" | "warning" | "danger"> = {
-    approved: "success",
-    pending: "warning",
-    rejected: "danger",
-  };
-
-  const categoryLabels: Record<string, string> = {
-    "cli-plugins": "CLI",
-    "lwc-library": "LWC",
-    "apex-utilities": "Apex",
-    "agentforce": "Agent",
-    "flow": "Flow",
-    "experience-cloud": "ExpCloud",
-  };
-
   return (
-    <div>
-      <h2 className="text-xl font-semibold mb-6">
-        All Resources ({allResources.length})
-      </h2>
-
-      <div className="bg-bg-card border border-border rounded-card overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-border">
-                <th className="text-left px-4 py-3 font-medium text-text-muted">
-                  Name
-                </th>
-                <th className="text-left px-4 py-3 font-medium text-text-muted">
-                  Category
-                </th>
-                <th className="text-left px-4 py-3 font-medium text-text-muted">
-                  Tags
-                </th>
-                <th className="text-left px-4 py-3 font-medium text-text-muted">
-                  Status
-                </th>
-                <th className="text-left px-4 py-3 font-medium text-text-muted">
-                  Rating
-                </th>
-                <th className="text-left px-4 py-3 font-medium text-text-muted">
-                  Author
-                </th>
-                <th className="text-left px-4 py-3 font-medium text-text-muted">
-                  Date
-                </th>
-                <th className="text-left px-4 py-3 font-medium text-text-muted">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {allResources.map((resource) => (
-                <tr key={resource.id} className="border-b border-border last:border-0">
-                  <td className="px-4 py-3 font-medium">
-                    {resource.name}
-                    {resource.featured && (
-                      <span className="ml-2 text-star text-xs">Featured</span>
-                    )}
-                  </td>
-                  <td className="px-4 py-3">
-                    <Badge>{categoryLabels[resource.category]}</Badge>
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="flex flex-wrap gap-1">
-                      {(tagsByResource[resource.id] || []).map((t) => (
-                        <Badge key={t.id} variant="primary" className="text-[10px] px-1.5 py-0">
-                          {t.name}
-                        </Badge>
-                      ))}
-                    </div>
-                  </td>
-                  <td className="px-4 py-3">
-                    <Badge variant={statusVariant[resource.status]}>
-                      {resource.status}
-                    </Badge>
-                  </td>
-                  <td className="px-4 py-3 text-text-muted">
-                    {parseFloat(resource.avgRating || "0").toFixed(1)} (
-                    {resource.reviewsCount})
-                  </td>
-                  <td className="px-4 py-3 text-text-muted">
-                    {resource.authorName || "Unknown"}
-                  </td>
-                  <td className="px-4 py-3 text-text-muted">
-                    {formatDate(resource.createdAt)}
-                  </td>
-                  <td className="px-4 py-3">
-                    <ResourceActions
-                      resourceId={resource.id}
-                      slug={resource.slug}
-                      status={resource.status}
-                      featured={resource.featured}
-                    />
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
+    <AdminResourcesTable
+      resources={allResources}
+      tagsByResource={tagsByResource}
+    />
   );
 }

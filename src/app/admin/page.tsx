@@ -46,7 +46,7 @@ export default async function AdminDashboard() {
     <div>
       <h2 className="text-xl font-semibold mb-6">Dashboard</h2>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-8">
         <StatsCard
           label="Total Users"
           value={Number(totalUsers.count)}
@@ -69,7 +69,7 @@ export default async function AdminDashboard() {
         />
       </div>
 
-      <div className="bg-bg-card border border-border rounded-card p-6 mb-8">
+      <div className="bg-bg-card border border-border rounded-card p-4 sm:p-6 mb-8">
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-semibold">Recent Submissions</h3>
           <Link

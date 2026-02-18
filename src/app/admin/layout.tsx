@@ -9,9 +9,9 @@ export default async function AdminLayout({
   await requireAdmin();
 
   return (
-    <div className="w-full px-6 py-8">
-      <div className="flex items-center gap-3 mb-6">
-        <h1 className="text-2xl font-bold">Admin Panel</h1>
+    <div className="w-full px-4 sm:px-6 py-6 sm:py-8">
+      <div className="flex items-center gap-3 mb-4 sm:mb-6">
+        <h1 className="text-xl sm:text-2xl font-bold">Admin Panel</h1>
       </div>
 
       <AdminTabs />

@@ -27,14 +27,14 @@ export function AdminTabs() {
             key={href}
             href={href}
             className={cn(
-              "flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors rounded-t-lg -mb-px whitespace-nowrap",
+              "flex items-center gap-2 px-3 sm:px-4 py-2 text-sm font-medium transition-colors rounded-t-lg -mb-px whitespace-nowrap",
               isActive
                 ? "text-primary border-b-2 border-primary"
                 : "text-text-muted hover:text-text-main"
             )}
           >
             <Icon size={16} />
-            {label}
+            <span className="hidden sm:inline">{label}</span>
           </Link>
         );
       })}

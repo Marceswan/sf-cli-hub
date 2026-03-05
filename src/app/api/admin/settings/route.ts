@@ -21,6 +21,10 @@ async function getSettings() {
       emailSubmissionApproved: true,
       emailSubmissionRejected: true,
       emailAdminAlert: true,
+      emailUserSuspended: true,
+      emailUserBanned: true,
+      emailUserRestored: true,
+      featureFlags: {},
     })
     .onConflictDoNothing()
     .returning();
@@ -33,6 +37,10 @@ async function getSettings() {
     emailSubmissionApproved: true,
     emailSubmissionRejected: true,
     emailAdminAlert: true,
+    emailUserSuspended: true,
+    emailUserBanned: true,
+    emailUserRestored: true,
+    featureFlags: {},
   };
 }
 
@@ -83,6 +91,29 @@ export async function PATCH(req: Request) {
     }
     if (typeof body.emailAdminAlert === "boolean") {
       updateData.emailAdminAlert = body.emailAdminAlert;
+    }
+    if (typeof body.emailUserSuspended === "boolean") {
+      updateData.emailUserSuspended = body.emailUserSuspended;
+    }
+    if (typeof body.emailUserBanned === "boolean") {
+      updateData.emailUserBanned = body.emailUserBanned;
+    }
+    if (typeof body.emailUserRestored === "boolean") {
+      updateData.emailUserRestored = body.emailUserRestored;
+    }
+
+    // Merge feature flags
+    if (body.featureFlags && typeof body.featureFlags === "object") {
+      const current = await getSettings();
+      const existing = (current.featureFlags ?? {}) as Record<string, boolean>;
+      const incoming = body.featureFlags as Record<string, unknown>;
+      const merged = { ...existing };
+      for (const [key, value] of Object.entries(incoming)) {
+        if (typeof value === "boolean") {
+          merged[key] = value;
+        }
+      }
+      updateData.featureFlags = merged;
     }
 
     if (Object.keys(updateData).length === 0) {

@@ -52,6 +52,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const isValid = await bcrypt.compare(password, user.passwordHash);
         if (!isValid) return null;
 
+        if (user.status !== "active") return null;
+
         return {
           id: user.id,
           name: user.name,
@@ -62,18 +64,33 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }),
   ],
   callbacks: {
+    async signIn({ user, account }) {
+      // For OAuth logins, check DB status
+      if (account?.provider !== "credentials" && user.id) {
+        const [dbUser] = await db
+          .select({ status: users.status })
+          .from(users)
+          .where(eq(users.id, user.id))
+          .limit(1);
+        if (dbUser && dbUser.status !== "active") {
+          return false;
+        }
+      }
+      return true;
+    },
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
       }
       if (token.id) {
         const [dbUser] = await db
-          .select({ role: users.role })
+          .select({ role: users.role, status: users.status })
           .from(users)
           .where(eq(users.id, token.id as string))
           .limit(1);
         if (dbUser) {
           token.role = dbUser.role;
+          token.status = dbUser.status;
         }
       }
       return token;
@@ -82,6 +99,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (session.user) {
         session.user.id = token.id as string;
         session.user.role = token.role as string;
+        session.user.status = token.status as string;
       }
       return session;
     },

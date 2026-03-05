@@ -135,7 +135,7 @@ export function BrowseContent() {
       ) : (
         <>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {resources.map((resource) => (
+            {resources.map((resource, index) => (
               <ResourceCard
                 key={resource.id}
                 slug={resource.slug}
@@ -149,6 +149,9 @@ export function BrowseContent() {
                 category={resource.category}
                 tags={resource.tags}
                 createdAt={resource.createdAt}
+                listingId={resource.id}
+                surface={debouncedSearch ? "search_results" : "browse_grid"}
+                position={index}
               />
             ))}
           </div>

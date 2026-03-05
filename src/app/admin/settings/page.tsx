@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Settings, Type, X, Plus, Mail } from "lucide-react";
+import { Settings, Type, X, Plus, Mail, ToggleRight } from "lucide-react";
 
 const DEFAULT_HERO_WORDS = "Architect,Admin,Developer,Superuser,DevOps,Consultant,Agentforce";
 
@@ -20,8 +20,14 @@ export default function AdminSettingsPage() {
     emailSubmissionApproved: true,
     emailSubmissionRejected: true,
     emailAdminAlert: true,
+    emailUserSuspended: true,
+    emailUserBanned: true,
+    emailUserRestored: true,
   });
   const [savingEmail, setSavingEmail] = useState<string | null>(null);
+
+  const [featureFlags, setFeatureFlags] = useState<Record<string, boolean>>({});
+  const [savingFlag, setSavingFlag] = useState<string | null>(null);
 
   useEffect(() => {
     fetch("/api/admin/settings")
@@ -39,7 +45,11 @@ export default function AdminSettingsPage() {
           emailSubmissionApproved: data.emailSubmissionApproved ?? true,
           emailSubmissionRejected: data.emailSubmissionRejected ?? true,
           emailAdminAlert: data.emailAdminAlert ?? true,
+          emailUserSuspended: data.emailUserSuspended ?? true,
+          emailUserBanned: data.emailUserBanned ?? true,
+          emailUserRestored: data.emailUserRestored ?? true,
         });
+        setFeatureFlags(data.featureFlags ?? {});
       })
       .finally(() => setLoading(false));
   }, []);
@@ -86,6 +96,23 @@ export default function AdminSettingsPage() {
       }
     } finally {
       setSavingEmail(null);
+    }
+  }
+
+  async function toggleFlag(key: string) {
+    setSavingFlag(key);
+    const newValue = !featureFlags[key];
+    try {
+      const res = await fetch("/api/admin/settings", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ featureFlags: { [key]: newValue } }),
+      });
+      if (res.ok) {
+        setFeatureFlags((prev) => ({ ...prev, [key]: newValue }));
+      }
+    } finally {
+      setSavingFlag(null);
     }
   }
 
@@ -234,6 +261,9 @@ export default function AdminSettingsPage() {
             { key: "emailSubmissionApproved" as const, label: "Submission Approved", desc: "Notify the submitter when their resource is approved." },
             { key: "emailSubmissionRejected" as const, label: "Submission Rejected", desc: "Notify the submitter when their resource is not approved." },
             { key: "emailAdminAlert" as const, label: "Admin New Submission Alert", desc: "Email all admins when a new resource is submitted for review." },
+            { key: "emailUserSuspended" as const, label: "User Suspended", desc: "Notify the user when their account is suspended." },
+            { key: "emailUserBanned" as const, label: "User Banned", desc: "Notify the user when their account is banned." },
+            { key: "emailUserRestored" as const, label: "User Restored", desc: "Notify the user when their account is restored to active." },
           ]).map(({ key, label, desc }) => (
             <div key={key} className="flex items-center justify-between">
               <div>
@@ -252,6 +282,47 @@ export default function AdminSettingsPage() {
                 <span
                   className={`inline-block h-4 w-4 rounded-full bg-white transition-transform ${
                     emailToggles[key] ? "translate-x-6" : "translate-x-1"
+                  }`}
+                />
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Feature Flags */}
+      <div className="bg-bg-card border border-border rounded-card p-6 mt-6">
+        <div className="flex items-start gap-3 mb-1">
+          <ToggleRight size={20} className="text-text-muted mt-0.5 shrink-0" />
+          <div>
+            <p className="font-medium">Feature Flags</p>
+            <p className="text-sm text-text-muted">
+              Toggle platform features on or off globally.
+            </p>
+          </div>
+        </div>
+
+        <div className="mt-4 space-y-4">
+          {([
+            { key: "pro", label: "Pro / Subscription Features", desc: "Controls Stripe billing, pro analytics (engagement, referrals, outbound, search queries, tag performance, export), and email digests. When off, these pages redirect and API routes return 404." },
+          ]).map(({ key, label, desc }) => (
+            <div key={key} className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium">{label}</p>
+                <p className="text-xs text-text-muted">{desc}</p>
+              </div>
+              <button
+                onClick={() => toggleFlag(key)}
+                disabled={savingFlag === key}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer shrink-0 ml-4 ${
+                  featureFlags[key] ? "bg-primary" : "bg-border"
+                } ${savingFlag === key ? "opacity-50" : ""}`}
+                role="switch"
+                aria-checked={featureFlags[key] ?? false}
+              >
+                <span
+                  className={`inline-block h-4 w-4 rounded-full bg-white transition-transform ${
+                    featureFlags[key] ? "translate-x-6" : "translate-x-1"
                   }`}
                 />
               </button>

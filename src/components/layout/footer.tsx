@@ -100,7 +100,7 @@ export function Footer() {
 
         <div className="border-t border-border pt-6 text-center text-sm text-text-muted space-y-1">
           <p>&copy; {new Date().getFullYear()} SFDX Hub. Not affiliated with Salesforce, Inc.</p>
-          <p>Made with <span className="text-red-500">&hearts;</span> by Swan Media Co.</p>
+          <p>Made with <span className="text-red-500">&hearts;</span> by Swan Media Co. and Claude Code.</p>
         </div>
       </div>
     </footer>

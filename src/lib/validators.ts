@@ -40,8 +40,20 @@ export const reviewSchema = z.object({
   body: z.string().max(2000).optional(),
 });
 
+export const updateUserSchema = z.object({
+  role: z.enum(["user", "admin"]).optional(),
+  status: z.enum(["active", "suspended", "banned"]).optional(),
+});
+
+export const inviteUserSchema = z.object({
+  email: z.string().email("Invalid email address"),
+  role: z.enum(["user", "admin"]).optional().default("user"),
+});
+
 export type LoginInput = z.infer<typeof loginSchema>;
 export type RegisterInput = z.infer<typeof registerSchema>;
 export type ResourceInput = z.infer<typeof resourceSchema>;
 export type TagInput = z.infer<typeof tagSchema>;
 export type ReviewInput = z.infer<typeof reviewSchema>;
+export type UpdateUserInput = z.infer<typeof updateUserSchema>;
+export type InviteUserInput = z.infer<typeof inviteUserSchema>;

@@ -3,9 +3,7 @@ export const dynamic = "force-dynamic";
 import { db } from "@/lib/db";
 import { resources, users, resourceTags, tags } from "@/lib/db/schema";
 import { eq, sql, inArray } from "drizzle-orm";
-import { Badge } from "@/components/ui/badge";
-import { formatDate } from "@/lib/utils";
-import { ResourceActions } from "@/components/admin/resource-actions";
+import { AdminResourcesTable } from "@/components/admin/admin-resources-table";
 
 export default async function AdminResourcesPage() {
   const allResources = await db
@@ -45,21 +43,6 @@ export default async function AdminResourcesPage() {
       return acc;
     }, {} as typeof tagsByResource);
   }
-
-  const statusVariant: Record<string, "success" | "warning" | "danger"> = {
-    approved: "success",
-    pending: "warning",
-    rejected: "danger",
-  };
-
-  const categoryLabels: Record<string, string> = {
-    "cli-plugins": "CLI",
-    "lwc-library": "LWC",
-    "apex-utilities": "Apex",
-    "agentforce": "Agent",
-    "flow": "Flow",
-    "experience-cloud": "ExpCloud",
-  };
 
   return (
     <div>

@@ -52,6 +52,7 @@ async function getTopResources(category: CategorySlug, limit = 3) {
   }
 
   return rows.map((r) => ({
+    id: r.id,
     slug: r.slug,
     name: r.name,
     description: r.description,

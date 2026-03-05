@@ -84,8 +84,26 @@ export async function fetchReadmeAsHtml(
       return null;
     }
 
+    // Determine the default branch for resolving relative URLs
+    const refMatch = (json.url || "").match(/[?&]ref=([^&]+)/);
+    const defaultBranch = refMatch ? refMatch[1] : "main";
+    const rawBase = `https://raw.githubusercontent.com/${owner}/${repo}/${defaultBranch}/`;
+    const blobBase = `https://github.com/${owner}/${repo}/blob/${defaultBranch}/`;
+
     const html = await marked(markdown);
-    const sanitized = sanitizeHtml(html, SANITIZE_OPTIONS);
+
+    // Resolve relative src/href to absolute GitHub URLs
+    const resolved = html
+      .replace(
+        /(<img\s[^>]*?\bsrc=["'])(?!https?:\/\/|\/\/)([^"']+)(["'])/gi,
+        (_, pre, path: string, post) => `${pre}${rawBase}${path.replace(/^\.\//, "")}${post}`
+      )
+      .replace(
+        /(<a\s[^>]*?\bhref=["'])(?!https?:\/\/|\/\/|#|mailto:)([^"']+)(["'])/gi,
+        (_, pre, path: string, post) => `${pre}${blobBase}${path.replace(/^\.\//, "")}${post}`
+      );
+
+    const sanitized = sanitizeHtml(resolved, SANITIZE_OPTIONS);
 
     return sanitized || null;
   } catch (err) {

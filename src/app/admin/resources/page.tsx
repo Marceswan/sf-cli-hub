@@ -67,7 +67,58 @@ export default async function AdminResourcesPage() {
         All Resources ({allResources.length})
       </h2>
 
-      <div className="bg-bg-card border border-border rounded-card overflow-hidden">
+      {/* Mobile card view */}
+      <div className="space-y-3 sm:hidden">
+        {allResources.map((resource) => (
+          <div
+            key={resource.id}
+            className="bg-bg-card border border-border rounded-card p-4"
+          >
+            <div className="flex items-start justify-between gap-2 mb-2">
+              <div className="min-w-0">
+                <p className="font-medium text-sm truncate">
+                  {resource.name}
+                  {resource.featured && (
+                    <span className="ml-2 text-star text-xs">Featured</span>
+                  )}
+                </p>
+                <p className="text-xs text-text-muted mt-0.5">
+                  {resource.authorName || "Unknown"} &middot;{" "}
+                  {formatDate(resource.createdAt)}
+                </p>
+              </div>
+              <ResourceActions
+                resourceId={resource.id}
+                slug={resource.slug}
+                status={resource.status}
+                featured={resource.featured}
+              />
+            </div>
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <Badge>{categoryLabels[resource.category]}</Badge>
+              <Badge variant={statusVariant[resource.status]}>
+                {resource.status}
+              </Badge>
+              {(tagsByResource[resource.id] || []).map((t) => (
+                <Badge
+                  key={t.id}
+                  variant="primary"
+                  className="text-[10px] px-1.5 py-0"
+                >
+                  {t.name}
+                </Badge>
+              ))}
+              <span className="text-xs text-text-muted ml-auto">
+                {parseFloat(resource.avgRating || "0").toFixed(1)} (
+                {resource.reviewsCount})
+              </span>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Desktop table view */}
+      <div className="hidden sm:block bg-bg-card border border-border rounded-card overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
@@ -100,7 +151,10 @@ export default async function AdminResourcesPage() {
             </thead>
             <tbody>
               {allResources.map((resource) => (
-                <tr key={resource.id} className="border-b border-border last:border-0">
+                <tr
+                  key={resource.id}
+                  className="border-b border-border last:border-0"
+                >
                   <td className="px-4 py-3 font-medium">
                     {resource.name}
                     {resource.featured && (
@@ -113,7 +167,11 @@ export default async function AdminResourcesPage() {
                   <td className="px-4 py-3">
                     <div className="flex flex-wrap gap-1">
                       {(tagsByResource[resource.id] || []).map((t) => (
-                        <Badge key={t.id} variant="primary" className="text-[10px] px-1.5 py-0">
+                        <Badge
+                          key={t.id}
+                          variant="primary"
+                          className="text-[10px] px-1.5 py-0"
+                        >
                           {t.name}
                         </Badge>
                       ))}

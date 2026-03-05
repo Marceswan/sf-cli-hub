@@ -71,18 +71,19 @@ export function TagManager({ initialTags }: { initialTags: Tag[] }) {
   return (
     <div className="space-y-6">
       {/* Create form */}
-      <div className="flex gap-3">
+      <div className="flex gap-2 sm:gap-3">
         <Input
           id="new-tag"
           value={newName}
           onChange={(e) => setNewName(e.target.value)}
           placeholder="New tag name..."
           onKeyDown={(e) => e.key === "Enter" && handleCreate()}
-          className="max-w-xs"
+          className="flex-1 sm:max-w-xs"
         />
-        <Button onClick={handleCreate} disabled={creating || !newName.trim()}>
+        <Button onClick={handleCreate} disabled={creating || !newName.trim()} className="shrink-0">
           <Plus size={16} />
-          {creating ? "Adding..." : "Add Tag"}
+          <span className="hidden sm:inline">{creating ? "Adding..." : "Add Tag"}</span>
+          <span className="sm:hidden">{creating ? "..." : "Add"}</span>
         </Button>
       </div>
 
@@ -93,73 +94,64 @@ export function TagManager({ initialTags }: { initialTags: Tag[] }) {
             No tags yet. Create your first tag above.
           </div>
         ) : (
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-border">
-                <th className="text-left px-4 py-3 font-medium text-text-muted">Name</th>
-                <th className="text-left px-4 py-3 font-medium text-text-muted">Slug</th>
-                <th className="text-right px-4 py-3 font-medium text-text-muted">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {initialTags.map((tag) => (
-                <tr key={tag.id} className="border-b border-border last:border-0">
-                  <td className="px-4 py-3">
-                    {editingId === tag.id ? (
-                      <div className="flex items-center gap-2">
-                        <input
-                          value={editName}
-                          onChange={(e) => setEditName(e.target.value)}
-                          onKeyDown={(e) => e.key === "Enter" && handleRename(tag.id)}
-                          className="px-2 py-1 bg-bg-surface border border-border rounded text-sm"
-                          autoFocus
-                        />
-                        <button
-                          onClick={() => handleRename(tag.id)}
-                          className="text-emerald-500 hover:text-emerald-400 cursor-pointer"
-                        >
-                          <Check size={16} />
-                        </button>
-                        <button
-                          onClick={() => setEditingId(null)}
-                          className="text-text-muted hover:text-text-main cursor-pointer"
-                        >
-                          <X size={16} />
-                        </button>
-                      </div>
-                    ) : (
-                      <Badge variant="primary">{tag.name}</Badge>
-                    )}
-                  </td>
-                  <td className="px-4 py-3 text-text-muted font-mono text-xs">
-                    {tag.slug}
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="flex items-center justify-end gap-2">
+          <div className="divide-y divide-border">
+            {initialTags.map((tag) => (
+              <div key={tag.id} className="flex items-center justify-between gap-3 px-4 py-3">
+                <div className="min-w-0">
+                  {editingId === tag.id ? (
+                    <div className="flex items-center gap-2">
+                      <input
+                        value={editName}
+                        onChange={(e) => setEditName(e.target.value)}
+                        onKeyDown={(e) => e.key === "Enter" && handleRename(tag.id)}
+                        className="px-2 py-1 bg-bg-surface border border-border rounded text-sm w-full"
+                        autoFocus
+                      />
                       <button
-                        onClick={() => {
-                          setEditingId(tag.id);
-                          setEditName(tag.name);
-                        }}
-                        className="text-text-muted hover:text-primary transition-colors cursor-pointer"
-                        title="Rename"
+                        onClick={() => handleRename(tag.id)}
+                        className="text-emerald-500 hover:text-emerald-400 cursor-pointer shrink-0"
                       >
-                        <Pencil size={14} />
+                        <Check size={16} />
                       </button>
                       <button
-                        onClick={() => handleDelete(tag.id)}
-                        disabled={deletingId === tag.id}
-                        className="text-text-muted hover:text-red-500 transition-colors cursor-pointer disabled:opacity-50"
-                        title="Delete"
+                        onClick={() => setEditingId(null)}
+                        className="text-text-muted hover:text-text-main cursor-pointer shrink-0"
                       >
-                        <Trash2 size={14} />
+                        <X size={16} />
                       </button>
                     </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                  ) : (
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <Badge variant="primary">{tag.name}</Badge>
+                      <span className="text-text-muted font-mono text-xs">{tag.slug}</span>
+                    </div>
+                  )}
+                </div>
+                {editingId !== tag.id && (
+                  <div className="flex items-center gap-2 shrink-0">
+                    <button
+                      onClick={() => {
+                        setEditingId(tag.id);
+                        setEditName(tag.name);
+                      }}
+                      className="text-text-muted hover:text-primary transition-colors cursor-pointer"
+                      title="Rename"
+                    >
+                      <Pencil size={14} />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(tag.id)}
+                      disabled={deletingId === tag.id}
+                      className="text-text-muted hover:text-red-500 transition-colors cursor-pointer disabled:opacity-50"
+                      title="Delete"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
         )}
       </div>
     </div>

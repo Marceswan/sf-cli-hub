@@ -5,9 +5,8 @@ import { resources, users, reviews } from "@/lib/db/schema";
 import { count, eq, sql } from "drizzle-orm";
 import { Users, Database, Inbox, Star } from "lucide-react";
 import { StatsCard } from "@/components/admin/stats-cards";
-import { Badge } from "@/components/ui/badge";
-import { formatDate } from "@/lib/utils";
 import Link from "next/link";
+import { RecentSubmissions } from "@/components/admin/recent-submissions";
 import { PulseDashboard } from "@/components/admin/pulse/pulse-dashboard";
 
 export default async function AdminDashboard() {
@@ -35,12 +34,6 @@ export default async function AdminDashboard() {
     .leftJoin(users, eq(resources.authorId, users.id))
     .orderBy(sql`${resources.createdAt} desc`)
     .limit(5);
-
-  const statusVariant: Record<string, "success" | "warning" | "danger"> = {
-    approved: "success",
-    pending: "warning",
-    rejected: "danger",
-  };
 
   return (
     <div>
@@ -79,27 +72,12 @@ export default async function AdminDashboard() {
             View all
           </Link>
         </div>
-        <div className="space-y-3">
-          {recentSubmissions.length === 0 ? (
-            <p className="text-text-muted text-sm">No submissions yet.</p>
-          ) : (
-            recentSubmissions.map((sub) => (
-              <div
-                key={sub.id}
-                className="flex items-center justify-between py-2 border-b border-border last:border-0"
-              >
-                <div>
-                  <p className="font-medium text-sm">{sub.name}</p>
-                  <p className="text-xs text-text-muted">
-                    by {sub.authorName || "Unknown"} &middot;{" "}
-                    {formatDate(sub.createdAt)}
-                  </p>
-                </div>
-                <Badge variant={statusVariant[sub.status]}>{sub.status}</Badge>
-              </div>
-            ))
-          )}
-        </div>
+        <RecentSubmissions
+          submissions={recentSubmissions.map((s) => ({
+            ...s,
+            createdAt: String(s.createdAt),
+          }))}
+        />
       </div>
 
       <PulseDashboard />

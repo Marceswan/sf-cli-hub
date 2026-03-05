@@ -5,9 +5,8 @@ import { resources, users, reviews } from "@/lib/db/schema";
 import { count, eq, sql } from "drizzle-orm";
 import { Users, Database, Inbox, Star } from "lucide-react";
 import { StatsCard } from "@/components/admin/stats-cards";
-import { Badge } from "@/components/ui/badge";
-import { formatDate } from "@/lib/utils";
 import Link from "next/link";
+import { RecentSubmissions } from "@/components/admin/recent-submissions";
 import { PulseDashboard } from "@/components/admin/pulse/pulse-dashboard";
 
 export default async function AdminDashboard() {
@@ -36,17 +35,11 @@ export default async function AdminDashboard() {
     .orderBy(sql`${resources.createdAt} desc`)
     .limit(5);
 
-  const statusVariant: Record<string, "success" | "warning" | "danger"> = {
-    approved: "success",
-    pending: "warning",
-    rejected: "danger",
-  };
-
   return (
     <div>
       <h2 className="text-xl font-semibold mb-6">Dashboard</h2>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-8">
         <StatsCard
           label="Total Users"
           value={Number(totalUsers.count)}
@@ -69,7 +62,7 @@ export default async function AdminDashboard() {
         />
       </div>
 
-      <div className="bg-bg-card border border-border rounded-card p-6 mb-8">
+      <div className="bg-bg-card border border-border rounded-card p-4 sm:p-6 mb-8">
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-semibold">Recent Submissions</h3>
           <Link
@@ -79,27 +72,12 @@ export default async function AdminDashboard() {
             View all
           </Link>
         </div>
-        <div className="space-y-3">
-          {recentSubmissions.length === 0 ? (
-            <p className="text-text-muted text-sm">No submissions yet.</p>
-          ) : (
-            recentSubmissions.map((sub) => (
-              <div
-                key={sub.id}
-                className="flex items-center justify-between py-2 border-b border-border last:border-0"
-              >
-                <div>
-                  <p className="font-medium text-sm">{sub.name}</p>
-                  <p className="text-xs text-text-muted">
-                    by {sub.authorName || "Unknown"} &middot;{" "}
-                    {formatDate(sub.createdAt)}
-                  </p>
-                </div>
-                <Badge variant={statusVariant[sub.status]}>{sub.status}</Badge>
-              </div>
-            ))
-          )}
-        </div>
+        <RecentSubmissions
+          submissions={recentSubmissions.map((s) => ({
+            ...s,
+            createdAt: String(s.createdAt),
+          }))}
+        />
       </div>
 
       <PulseDashboard />

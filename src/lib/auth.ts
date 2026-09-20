@@ -20,6 +20,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   },
   providers: [
     GitHub({
+      // GitHub now returns iss=https://github.com/login/oauth (RFC 9207);
+      // Auth.js rejects the callback unless the issuer matches.
+      issuer: "https://github.com/login/oauth",
       allowDangerousEmailAccountLinking: true,
       profile(profile) {
         return {

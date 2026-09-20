@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { SessionProvider } from "@/components/providers/session-provider";
@@ -47,6 +48,14 @@ export default async function RootLayout({
             </FeatureFlagsProvider>
           </ThemeProvider>
         </SessionProvider>
+        <Script
+          src="/_s/a.js"
+          strategy="afterInteractive"
+          data-website-id="21970abd-f7d7-463a-bc0f-af435f054f4c"
+          data-host-url="/_s"
+          data-domains="www.sfdxhub.com,sfdxhub.com"
+          data-performance="true"
+        />
       </body>
     </html>
   );

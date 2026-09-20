@@ -13,6 +13,13 @@ const nextConfig: NextConfig = {
       process.env.NEXT_PUBLIC_APP_URL || "https://sfdxhub.com",
     AUTH_TRUST_HOST: process.env.AUTH_TRUST_HOST || "true",
   },
+  async rewrites() {
+    return [
+      { source: "/_s/a.js", destination: "https://stats.atrop-os.com/script.js" },
+      { source: "/_s/api/send", destination: "https://stats.atrop-os.com/api/send" },
+      { source: "/_s/api/hit", destination: "https://stats.atrop-os.com/api/send" },
+    ];
+  },
   images: {
     remotePatterns: [
       {

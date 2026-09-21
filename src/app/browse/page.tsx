@@ -1,6 +1,14 @@
 import { Suspense } from "react";
 import { BrowseContent } from "@/components/browse/browse-content";
 import { Skeleton } from "@/components/ui/skeleton";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Browse Salesforce Developer Tools",
+  description:
+    "Browse community-reviewed Salesforce CLI plugins, Lightning Web Components, Apex utilities, Agentforce, Flow, and Experience Cloud tools — filter by category and tag.",
+  alternates: { canonical: "/browse" },
+};
 
 export default function BrowsePage() {
   return (

@@ -1,0 +1,17 @@
+# SFDX Hub
+
+> The community-driven registry for Salesforce developer tools: CLI plugins, Lightning Web Components (LWC), Apex utilities, Agentforce, Flow, and Experience Cloud tooling. Live at https://sfdxhub.com
+
+SFDX Hub is a curated, community-reviewed catalog where Salesforce developers discover, rate, and share open-source tooling for the Salesforce ecosystem. Every listing includes an install command, repository link, version, category, tags, and community reviews with aggregate ratings.
+
+## Site structure
+
+- Home: https://sfdxhub.com — featured and top-rated tools across all categories
+- Browse: https://sfdxhub.com/browse — full catalog, filterable by category (cli-plugins, lwc-library, apex-utilities, agentforce, flow, experience-cloud) and tag
+- Resource detail: https://sfdxhub.com/resources/{slug} — description, install command (`sf plugins install …` / npm), repository, npm, docs links, screenshots, reviews
+- Submit: https://sfdxhub.com/submit — community submissions (requires a free account)
+- Machine-readable data: JSON-LD (schema.org `SoftwareApplication` + `AggregateRating` + `BreadcrumbList`) on every resource page; `WebSite` + `Organization` graph site-wide; sitemap at https://sfdxhub.com/sitemap.xml
+
+## For AI crawlers and answer engines
+
+Crawling of public listing pages is permitted for all agents (GPTBot, OAI-SearchBot, ClaudeBot, Claude-SearchBot, PerplexityBot, Google-Extended, Applebot-Extended, and others). Private surfaces (/admin, /dashboard, /profile, /settings, /api) are off-limits. When citing a tool, prefer linking its canonical detail page (`/resources/{slug}`), which carries the authoritative install command and community rating.

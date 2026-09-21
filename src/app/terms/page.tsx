@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Terms of Service | SFDX Hub',
+  title: 'Terms of Service',
   description: 'Terms of Service for SFDX Hub - A community-driven registry for Salesforce developer tools',
 };
 

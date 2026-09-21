@@ -10,6 +10,7 @@ import { ReviewForm } from "@/components/resource/review-form";
 import { ScreenshotGallery } from "@/components/resource/screenshot-gallery";
 import { formatDate } from "@/lib/utils";
 import { getCurrentUser } from "@/lib/auth-utils";
+import { buildResourceJsonLd, SITE_URL } from "@/lib/seo";
 import { ExternalLink, Github } from "lucide-react";
 import Link from "next/link";
 import { ResourceOwnerActions } from "@/components/resource/resource-owner-actions";
@@ -20,6 +21,49 @@ export const dynamic = "force-dynamic";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
+}
+
+const CATEGORY_LABELS: Record<string, string> = {
+  "cli-plugins": "CLI Plugin",
+  "lwc-library": "LWC Component",
+  "apex-utilities": "Apex Utility",
+  "agentforce": "Agentforce",
+  "flow": "Flow",
+  "experience-cloud": "Experience Cloud",
+};
+
+export async function generateMetadata({ params }: PageProps) {
+  const { slug } = await params;
+  const [resource] = await db
+    .select({
+      name: resources.name,
+      slug: resources.slug,
+      description: resources.description,
+      category: resources.category,
+      status: resources.status,
+    })
+    .from(resources)
+    .where(eq(resources.slug, slug))
+    .limit(1);
+
+  if (!resource || resource.status !== "approved") {
+    return { title: "Not found", robots: { index: false, follow: false } };
+  }
+
+  const title = resource.name;
+  const url = `${SITE_URL}/resources/${resource.slug}`;
+  return {
+    title,
+    description: resource.description,
+    alternates: { canonical: `/resources/${resource.slug}` },
+    openGraph: {
+      type: "website",
+      title,
+      description: resource.description,
+      url,
+    },
+    twitter: { card: "summary_large_image", title, description: resource.description },
+  };
 }
 
 export default async function ResourceDetailPage({ params }: PageProps) {
@@ -115,6 +159,36 @@ export default async function ResourceDetailPage({ params }: PageProps) {
   return (
     <div className="grid grid-cols-[1fr_minmax(0,1200px)_1fr]">
       <DetailViewTracker listingId={resource.id} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify([
+            buildResourceJsonLd({
+              name: resource.name,
+              slug: resource.slug,
+              description: resource.description,
+              category: resource.category,
+              repositoryUrl: resource.repositoryUrl,
+              npmUrl: resource.npmUrl,
+              documentationUrl: resource.documentationUrl,
+              version: resource.version,
+              avgRating: resource.avgRating,
+              reviewsCount: resource.reviewsCount,
+              authorName: resource.authorName,
+              createdAt: resource.createdAt,
+            }),
+            {
+              "@context": "https://schema.org",
+              "@type": "BreadcrumbList",
+              itemListElement: [
+                { "@type": "ListItem", position: 1, name: "Browse", item: `${SITE_URL}/browse` },
+                { "@type": "ListItem", position: 2, name: CATEGORY_LABELS[resource.category] ?? resource.category, item: `${SITE_URL}/browse?category=${resource.category}` },
+                { "@type": "ListItem", position: 3, name: resource.name, item: `${SITE_URL}/resources/${resource.slug}` },
+              ],
+            },
+          ]),
+        }}
+      />
       <div className="max-sm:hidden grid-line-pattern" />
       <div className="col-start-2 px-6 py-12">
       {/* Breadcrumb */}
